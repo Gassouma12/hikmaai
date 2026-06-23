@@ -1,0 +1,324 @@
+/* ─────────────────────────────────────────────
+   HIKMA AI — Global styles & design tokens
+   Palette preserved from the original site.
+   Revamp: "illuminated editorial" — bilingual index
+   headers, ornaments, and a site-wide Arabic texture.
+───────────────────────────────────────────── */
+:root {
+  /* ── Sunlit Library — parchment + deep ink + burnished gold ── */
+  --paper: #fdf9f0;          /* ivory parchment (page bg) */
+  --paper-2: #f6efde;        /* slightly deeper paper */
+  --card: #fffdf8;           /* card / surface (bright) */
+  --watermark: #e8e4d8;      /* calligraphy watermark grey */
+
+  --black: #121212;          /* dark marks on gold (button text) */
+  --deep: #f6efde;           /* light surface */
+  --olive: #f1e9d4;          /* light surface */
+  --olive-mid: #ebe1c6;      /* deeper light surface */
+
+  /* gold = legacy / borders / icons (NOT body text) */
+  --sand: #9a7a22;           /* deep gold — heading emphasis */
+  --sand-light: #8a6f1f;     /* deep gold — card titles */
+  --gold: #c39a2c;           /* gold accent */
+  --gold-bright: #d4af37;    /* burnished gold (numerals, dividers) */
+  --gold-dim: #a8862a;       /* dim gold */
+
+  --ivory: #1a1a1a;          /* primary ink text */
+  --ivory-dim: #45433d;      /* secondary text */
+  --text-dim: #6c685d;       /* muted text */
+  --white: #0d0d0c;          /* emphasis ink */
+
+  --copper: #b5642f;         /* warm accent (Harms) */
+  --copper-light: #a85a2a;
+
+  /* ponytail: token name kept (was cyan); all `var(--teal*)` callsites now
+     resolve to burnished gold without a sweep. Rename callsites when touching them. */
+  --teal: #d4af37;
+  --teal-deep: #a8862a;
+  --teal-ink: #1a1a1a;
+  --teal-glow: rgba(212, 175, 55, 0.42);
+
+  --border: rgba(212, 175, 55, 0.4);
+  --border-bright: rgba(212, 175, 55, 0.7);
+
+  --panel: rgba(255, 253, 248, 0.85);
+  --panel-solid: rgba(255, 253, 248, 0.95);
+
+  --font-serif: 'Libre Caslon Text', Georgia, serif;
+  --font-display: 'Libre Caslon Text', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  --maxw: 1240px;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ivory);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+ul { list-style: none; }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--paper-2); }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 2px; }
+
+/* ─── Layout container ─── */
+.shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding-left: 64px;
+  padding-right: 64px;
+}
+
+.page {
+  padding-top: 150px;
+  min-height: 100vh;
+  position: relative;
+  z-index: 2;
+}
+
+/* ─── Eyebrow / kicker ─── */
+.kicker {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* ─── Masthead (bilingual editorial header) ─── */
+.masthead { margin-bottom: 18px; }
+.masthead--center { text-align: center; }
+.masthead-meta {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 26px;
+}
+.masthead--center .masthead-meta { justify-content: center; }
+.masthead-index {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--gold-bright);
+}
+.masthead-rule {
+  width: 56px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold-dim), transparent);
+}
+.masthead--center .masthead-rule {
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+.masthead-kicker {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.masthead-arabic {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-style: italic;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--gold-dim);
+}
+.masthead-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.6rem, 5.4vw, 5rem);
+  font-weight: 300;
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  color: var(--ivory);
+}
+.masthead-title em { font-style: italic; color: var(--sand); }
+.masthead-lede {
+  font-family: var(--font-serif);
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--ivory-dim);
+  line-height: 1.8;
+  max-width: 720px;
+  margin-top: 28px;
+}
+.masthead--center .masthead-lede { margin-left: auto; margin-right: auto; }
+
+/* legacy helpers still used in a few spots */
+.lede {
+  font-family: var(--font-serif);
+  font-size: clamp(1.1rem, 1.8vw, 1.45rem);
+  font-weight: 300;
+  font-style: italic;
+  color: var(--ivory-dim);
+  line-height: 1.8;
+}
+.section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.4rem, 4vw, 4rem);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--ivory);
+}
+.section-title em { font-style: italic; color: var(--sand); }
+
+/* ─── Star divider ─── */
+.star-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--gold-dim);
+  margin: 0 auto;
+  max-width: 520px;
+}
+.star-divider .rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim));
+}
+.star-divider .rule:last-child {
+  background: linear-gradient(90deg, var(--gold-dim), transparent);
+}
+.star-divider .star { color: var(--gold); opacity: 0.7; }
+.star-divider .star-mid { color: var(--gold-bright); opacity: 1; }
+.star-divider .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--gold-dim); }
+
+/* ─── Buttons ─── */
+.btn {
+  font-family: var(--font-sans);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 15px 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 0.4s var(--ease), transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+/* gold with an ink-bleed hover (ink wipes up, label flips light) */
+.btn-primary {
+  color: var(--teal-ink);
+  background: var(--teal);
+  box-shadow: 0 6px 22px var(--teal-glow);
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #1a1a1a;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.4s var(--ease);
+  z-index: -1;
+}
+.btn-primary:hover { color: #fdf9f0; transform: translateY(-2px); box-shadow: 0 12px 32px var(--teal-glow); }
+.btn-primary:hover::before { transform: scaleY(1); }
+/* gold outline → gold glass fill on hover */
+.btn-secondary {
+  color: var(--ivory);
+  border: 1px solid var(--border-bright);
+}
+.btn-secondary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.18), rgba(212, 175, 55, 0));
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+  z-index: -1;
+}
+.btn-secondary:hover { border-color: var(--gold); transform: translateY(-2px); }
+.btn-secondary:hover::before { opacity: 1; }
+.play-icon {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+}
+
+/* ─── Panels (cards) base ─── */
+.panel {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+/* corner ticks used on several cards */
+.corner-ticks::before,
+.corner-ticks::after {
+  content: '';
+  position: absolute;
+  width: 16px; height: 16px;
+  border-color: var(--gold);
+  border-style: solid;
+  opacity: 0.5;
+  transition: opacity 0.4s, width 0.4s, height 0.4s;
+}
+.corner-ticks::before { top: 10px; left: 10px; border-width: 1px 0 0 1px; }
+.corner-ticks::after { bottom: 10px; right: 10px; border-width: 0 1px 1px 0; }
+.corner-ticks:hover::before,
+.corner-ticks:hover::after { opacity: 1; width: 22px; height: 22px; }
+
+@media (max-width: 1024px) {
+  .shell { padding-left: 30px; padding-right: 30px; }
+}
+@media (max-width: 680px) {
+  .page { padding-top: 116px; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
