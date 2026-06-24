@@ -272,6 +272,89 @@ export const EPISODES = [
   },
 ]
 
+// ─── Articles (Voices · Essays & Field Notes) ───
+// Each article has a unique numeric id; `body` is an array of paragraph strings
+// rendered with drop-cap styling on the first paragraph. Cover images use
+// Unsplash so the article cards always have rich visuals without local assets.
+export const ARTICLES = [
+  {
+    id: 1,
+    tag: 'Field Notes',
+    title: 'The Voice the Algorithm Could Not Find',
+    excerpt:
+      'Six months of recording dialect Arabic in a Tunis café — and what the silence in our datasets actually sounds like.',
+    cover:
+      'https://images.unsplash.com/photo-1542816417-0983c9c9ad53?w=1600&q=80&auto=format&fit=crop',
+    author: 'Maha Jouini',
+    role: 'Founder, HIKMA AI',
+    date: 'June 18, 2026',
+    readTime: '8 min read',
+    body: [
+      'For half a year, I sat in the same café in Bab Bhar with a microphone, a notebook, and the patience of people who knew their language had never been listened to properly. The voices I recorded were not in textbook Modern Standard Arabic. They were Tunisian — fast, lyrical, full of French and Berber and the rhythm of street life. They were also, by every measure that matters to a machine, invisible.',
+      'When we talk about "low-resource languages" in machine learning, we use the phrase as if it described an act of nature. As if some languages were simply born poor in data. The truth is exactly the opposite. The data is everywhere. It is in markets and mosques and weddings and the back rooms of barbershops. What is missing is the will to gather it on terms that respect the people who speak it.',
+      'A community-led data project is not a "dataset". It is a relationship. The voices in my recorder belong to people whose names I know. Any model trained on them carries an obligation — not metaphorically, but contractually — to serve those communities first. This is the simple, unsexy starting point that almost no major AI lab has been willing to accept.',
+      'There is a version of the next decade where Arabic-language AI is built in San Francisco from scraped web text, deployed back to our nations, and quietly reshapes how 400 million people are understood by the systems that govern their lives. There is another version where it is built here, with our hands, on our terms. The difference is not a question of technology. It is a question of who owns the silence.',
+    ],
+  },
+  {
+    id: 2,
+    tag: 'Essay',
+    title: 'Hikma Before Intelligence: What the Philosophers Knew',
+    excerpt:
+      'Ibn Sina did not separate the mind from its responsibility to the world. Neither should we — even when the mind is silicon.',
+    cover:
+      'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1600&q=80&auto=format&fit=crop',
+    author: 'Prof. Idris Wangara',
+    role: 'Philosopher of Science · Timbuktu',
+    date: 'June 4, 2026',
+    readTime: '12 min read',
+    body: [
+      'In the long arc of Islamic philosophy, the word for wisdom — hikma — is never used carelessly. It is not a synonym for cleverness, nor for knowledge, nor for skill. Ibn Sina, writing in the eleventh century, defines it as the perfecting of the human soul through the apprehension of truth and the practice of right action. A mind that knows but does not act rightly has not yet become wise.',
+      'It is striking how thoroughly the modern conversation about artificial intelligence has stripped this dimension out. We speak of capability benchmarks, parameter counts, reasoning scores. We speak rarely, and reluctantly, of whether the resulting systems are wise. The word feels embarrassing in a technical room. It should not.',
+      'The Greek tradition Aristotle handed down — and which the Arab philosophers preserved when Europe was no longer capable of doing so — drew a careful distinction between sophia (theoretical wisdom) and phronesis (practical wisdom). The latter was the one that mattered for governance, for medicine, for any field where a wrong answer could ruin a life. It is, almost exactly, the kind of wisdom we are now failing to encode into the systems we are deploying into governance, medicine, and policing.',
+      'To recover hikma as a category in the design of AI is not to add a soft layer of "ethics" on top of an otherwise neutral technology. There is no such neutral technology. To recover hikma is to insist that the question "should we build this?" cannot be downstream of "can we build this?" — that the order of those two questions is itself a moral choice.',
+    ],
+  },
+  {
+    id: 3,
+    tag: 'Investigation',
+    title: 'Faces the Cameras Cannot See: A Year on the Lagos Beat',
+    excerpt:
+      'How a single facial-recognition contract reshaped policing in West Africa\'s largest city — and the women who pushed back.',
+    cover:
+      'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=1600&q=80&auto=format&fit=crop',
+    author: 'Amara Okafor',
+    role: 'Algorithmic Justice Researcher · Lagos',
+    date: 'May 22, 2026',
+    readTime: '15 min read',
+    body: [
+      'The contract was signed quietly, on a Tuesday in October, in a conference room two blocks from the National Assembly. By the following spring, eleven thousand cameras across Lagos were piping live video to a facial-recognition system whose error rate on darker-skinned faces had never been independently audited. Nobody in the city had been asked.',
+      'I spent a year reporting on the rollout. What I found was not a story of technological failure — the system failed, yes, but it had been built knowing it would fail. The story is about what happens when a tool whose failures are foreseeable is deployed anyway, against a population that was never going to be the one writing the procurement specifications.',
+      'The women who organized the resistance came from three movements that had not previously spoken to one another: market-women\'s associations whose members were being misidentified at checkpoints, lawyers from the bail-reform coalition, and a small cohort of computer scientists who had read the wrong papers and could not unread them. They built a public dossier. They forced a hearing. They are still fighting, but the numbers on misidentification have started to fall.',
+      'This is what algorithmic justice work actually looks like, far from the conference panels: it is paperwork, court filings, a refusal to be patient. It is also the proof — for anyone still asking — that the harms of AI are not a future problem. They are already here, in the booking room of a precinct in Yaba, where a woman who has never broken a law is being asked, again, to explain her face.',
+    ],
+  },
+  {
+    id: 4,
+    tag: 'Dispatch',
+    title: 'What the Sankore Manuscripts Are Still Teaching Us',
+    excerpt:
+      'Seven hundred thousand surviving texts. A continent that was never silent. A model for what a public AI archive could become.',
+    cover:
+      'https://images.unsplash.com/photo-1519682337058-a94d519337bc?w=1600&q=80&auto=format&fit=crop',
+    author: 'Fatou Diop',
+    role: 'Digital Policy Lead · Dakar',
+    date: 'May 9, 2026',
+    readTime: '10 min read',
+    body: [
+      'There is a long-standing fiction in Western intellectual history that Africa was an oral continent, its knowledge held only in voice, vulnerable in the way that oral traditions are imagined to be vulnerable. The Sankore manuscripts — over seven hundred thousand texts surviving in family libraries across Mali — are the simplest possible refutation of that fiction. They are also a roadmap.',
+      'For most of the past decade, the question of what a "public" AI archive should look like has been argued in the terms of Silicon Valley and Brussels. Should training data be opt-in or opt-out? Should it respect copyright? Should there be a licensing regime? These are real questions, but they are also small ones. They assume the archive is something a company gathers, with the public as a passive donor of text.',
+      'The Sankore tradition offers a different model. The manuscripts were preserved across centuries by families who understood themselves as custodians, not owners. Knowledge belonged to the community that produced it; access was a privilege earned through scholarship and conferred through teaching. A digital archive built on those terms would not look like Common Crawl. It would look like a relationship.',
+      'It is possible to build AI systems that are accountable to the communities whose knowledge they encode. It is possible because it has been done before, for seven hundred years, in a city whose libraries the algorithm has never heard of. The question is whether we are willing to learn from people who solved this problem long before we invented it.',
+    ],
+  },
+]
+
 // ─── Philosophy timeline ───
 export const PHILOSOPHERS = [
   {

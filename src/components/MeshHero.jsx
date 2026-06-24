@@ -11,10 +11,16 @@ import calligraphy from '../images/calligraphy.png'
  */
 const CREAM = ['#f3e9c8', '#fdf6dc', '#e3d2a2', '#d4af37', '#b88e1f']
 const CYCLE_WORDS = ['Wisdom.', 'Peace.', 'Humanity.', 'Responsibility.', 'Hikma.']
-// Dust-fade transitions used by both the title and the cycling highlight.
+const CYCLE_MS = 5000
+// Dust-fade transitions — title still uses the original (gentler) set;
+// the cycling highlight uses a more dramatic set: larger blur, more drift,
+// stronger scale, so the dust-on / dust-off reads as a real event over 5s.
 const DUST_IN  = { opacity: 0, y: 22, scale: 1.06, filter: 'blur(14px)' }
 const DUST_AT  = { opacity: 1, y: 0,  scale: 1,    filter: 'blur(0px)'  }
 const DUST_OUT = { opacity: 0, y: -10, scale: 1.08, filter: 'blur(18px)' }
+const HL_IN  = { opacity: 0, y: 42, scale: 1.18, filter: 'blur(28px)', letterSpacing: '0.08em' }
+const HL_AT  = { opacity: 1, y: 0,  scale: 1,    filter: 'blur(0px)',  letterSpacing: '0em'    }
+const HL_OUT = { opacity: 0, y: -28, scale: 1.22, filter: 'blur(32px)', letterSpacing: '0.12em' }
 
 /** Splits a string into words and animates each one fading + rising in.
     Spaces are placed as sibling text nodes (flatMap) so they aren't trapped
@@ -40,16 +46,23 @@ function TypewriterFade({ text, baseDelay = 0, className = '' }) {
 }
 
 /** Cycling highlight word — motion.em at root lets AnimatePresence mode="wait"
-    fully exit the old word before the new one enters. */
+    fully exit the old word before the new one enters. The dramatic dust-in /
+    dust-out preset gives it a strong "swap" feel at the slower 5s cadence. */
 function HighlightWord({ text, baseDelay = 0 }) {
   return (
     <motion.em
       className="hl"
-      style={{ display: 'inline', fontStyle: 'italic' }}
-      initial={DUST_IN}
-      animate={DUST_AT}
-      exit={DUST_OUT}
-      transition={{ duration: 0.55, delay: baseDelay, ease: [0.23, 1, 0.32, 1] }}
+      style={{ display: 'inline-block', fontStyle: 'italic', willChange: 'transform, opacity, filter' }}
+      initial={HL_IN}
+      animate={HL_AT}
+      exit={HL_OUT}
+      transition={{
+        opacity:       { duration: 1.4, delay: baseDelay, ease: [0.16, 1, 0.3, 1] },
+        y:             { duration: 1.4, delay: baseDelay, ease: [0.16, 1, 0.3, 1] },
+        scale:         { duration: 1.4, delay: baseDelay, ease: [0.16, 1, 0.3, 1] },
+        filter:        { duration: 1.2, delay: baseDelay, ease: [0.16, 1, 0.3, 1] },
+        letterSpacing: { duration: 1.4, delay: baseDelay, ease: [0.16, 1, 0.3, 1] },
+      }}
     >
       {text}
     </motion.em>
@@ -122,7 +135,7 @@ export default function MeshHero({
     const id = setInterval(() => {
       cycledRef.current = true
       setWordIdx((i) => (i + 1) % CYCLE_WORDS.length)
-    }, 2000)
+    }, CYCLE_MS)
     return () => clearInterval(id)
   }, [])
   // If a non-default `highlight` prop was passed, honour it; otherwise cycle.

@@ -8,6 +8,7 @@ import Home from './pages/Home.jsx'
 import About from './pages/About.jsx'
 import Harms from './pages/Harms.jsx'
 import Media from './pages/Media.jsx'
+import Article from './pages/Article.jsx'
 import Philosophy from './pages/Philosophy.jsx'
 import Contact from './pages/Contact.jsx'
 
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/harms" element={<Harms />} />
           <Route path="/media" element={<Media />} />
+          <Route path="/media/articles/:id" element={<Article />} />
           <Route path="/philosophy" element={<Philosophy />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<Home />} />
