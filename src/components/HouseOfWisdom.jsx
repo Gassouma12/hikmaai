@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Reveal from './Reveal.jsx'
 import StarMotif from './StarMotif.jsx'
 // CountUp removed inside this component: its useInView listener firing during
@@ -17,6 +17,20 @@ import timImg from '../images/tim.png'
  */
 export default function HouseOfWisdom() {
   const [active, setActive] = useState(null)
+  const deckRef = useRef(null)
+
+  // Click anywhere outside the active card collapses it.
+  useEffect(() => {
+    if (!active) return
+    const handler = (e) => {
+      if (deckRef.current && !deckRef.current.contains(e.target)) {
+        setActive(null)
+      }
+    }
+    // Use mousedown so we react before any other click handlers.
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [active])
 
   const cards = [
     { key: 'baghdad',  data: BAYT_AL_HIKMA, image: baghImg, accent: 'amber', subjects: null,             crisis: null },
@@ -34,7 +48,7 @@ export default function HouseOfWisdom() {
         </p>
       </Reveal>
 
-      <div className="hw-deck">
+      <div className="hw-deck" ref={deckRef}>
         {cards.map((c) => {
           const isActive = active === c.key
           const isCollapsed = active !== null && !isActive

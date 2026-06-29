@@ -4,21 +4,27 @@ import PageTransition from '../components/PageTransition.jsx'
 import Reveal from '../components/Reveal.jsx'
 import StarDivider from '../components/StarDivider.jsx'
 import { ARTICLES } from '../data/content.js'
+import { useStorage } from '../lib/storage.js'
 
 export default function Article() {
   const { id } = useParams()
-  const article = useMemo(() => ARTICLES.find((a) => String(a.id) === String(id)), [id])
+  const [userArticles] = useStorage('articles', [])
+  const all = useMemo(() => [...userArticles, ...ARTICLES], [userArticles])
+  const article = useMemo(() => all.find((a) => String(a.id) === String(id)), [id, all])
 
   if (!article) return <NotFound />
 
-  // Reading-time estimate from total words (200 wpm). Falls back to the
-  // article's stored readTime if present.
-  const words = article.body.reduce((n, p) => n + p.split(/\s+/).length, 0)
-  const readMinutes = article.readTime || `${Math.max(1, Math.round(words / 200))} min read`
+  // Admin-authored articles store body as one HTML string (from RichTextEditor).
+  // Seeded articles store it as an array of paragraph strings.
+  const bodyIsHtml = typeof article.body === 'string'
+  const wordCount = bodyIsHtml
+    ? (article.body.replace(/<[^>]+>/g, ' ').match(/\S+/g) || []).length
+    : article.body.reduce((n, p) => n + p.split(/\s+/).length, 0)
+  const readMinutes = article.readTime || `${Math.max(1, Math.round(wordCount / 200))} min read`
 
   // Next article (wraps around) for the "Keep reading" card at the bottom.
-  const idx = ARTICLES.findIndex((a) => a.id === article.id)
-  const next = ARTICLES[(idx + 1) % ARTICLES.length]
+  const idx = all.findIndex((a) => a.id === article.id)
+  const next = all[(idx + 1) % all.length]
 
   return (
     <PageTransition>
@@ -70,11 +76,19 @@ export default function Article() {
 
         {/* Body */}
         <div className="article-body shell">
-          {article.body.map((p, i) => (
-            <Reveal as="p" className="article-p" key={i} delay={0.04} y={18}>
-              {p}
+          {bodyIsHtml ? (
+            // Admin rich-text. Sanitized only against script tags — adequate
+            // since the content is authored by the trusted admin, not users.
+            <Reveal y={18}>
+              <div className="article-rich" dangerouslySetInnerHTML={{ __html: stripScripts(article.body) }} />
             </Reveal>
-          ))}
+          ) : (
+            article.body.map((p, i) => (
+              <Reveal as="p" className="article-p" key={i} delay={0.04} y={18}>
+                {p}
+              </Reveal>
+            ))
+          )}
 
           <StarDivider className="article-divider" />
 
@@ -102,6 +116,15 @@ export default function Article() {
       </article>
     </PageTransition>
   )
+}
+
+/** Light sanitizer: remove <script> tags + inline event handlers. Admin-authored
+    so trust is implicit, but defense in depth. */
+function stripScripts(html) {
+  return String(html)
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/\son\w+="[^"]*"/gi, '')
+    .replace(/\son\w+='[^']*'/gi, '')
 }
 
 function NotFound() {

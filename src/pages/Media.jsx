@@ -7,6 +7,7 @@ import Masthead from '../components/Masthead.jsx'
 import StarMotif from '../components/StarMotif.jsx'
 import CountUp from '../components/CountUp.jsx'
 import { PODCAST, EPISODES, ARTICLES } from '../data/content.js'
+import { useStorage, youtubeId } from '../lib/storage.js'
 
 const PAGE_SIZE = 5
 
@@ -14,8 +15,14 @@ export default function Media() {
   const [tab, setTab] = useState('episodes') // 'episodes' | 'articles'
   const [page, setPage] = useState(1)
 
+  // Merge admin-added entries (localStorage) with the seeded ones.
+  const [userEpisodes] = useStorage('episodes', [])
+  const [userArticles] = useStorage('articles', [])
+  const allEpisodes = useMemo(() => [...userEpisodes, ...EPISODES], [userEpisodes])
+  const allArticles = useMemo(() => [...userArticles, ...ARTICLES], [userArticles])
+
   // Source list + pagination derived together so a tab swap also resets to page 1.
-  const list = tab === 'episodes' ? EPISODES : ARTICLES
+  const list = tab === 'episodes' ? allEpisodes : allArticles
   const pageCount = Math.max(1, Math.ceil(list.length / PAGE_SIZE))
   const safePage = Math.min(page, pageCount)
   const slice = useMemo(
@@ -113,20 +120,36 @@ export default function Media() {
   )
 }
 
-/* ─── Episode list (extracted unchanged from the previous Media) ─── */
+/* ─── Episode list ─── */
 function EpisodeList({ items }) {
   return (
     <div className="episode-list">
-      {items.map((ep, i) => (
-        <Reveal as="article" className="episode" key={ep.num} delay={(i % 2) * 0.06} y={28}>
-          <a className="episode-thumb" href={ep.youtube} aria-label={`Watch episode ${ep.num}: ${ep.title}`}>
-            <span className="episode-thumb-motif" aria-hidden="true">
-              <StarMotif size={64} stroke="var(--gold-dim)" strokeWidth={0.6} />
-            </span>
-            <span className="episode-ep">EP. {ep.num}</span>
-            <span className="episode-play" aria-hidden="true">▶</span>
-            <span className="episode-duration">{ep.duration}</span>
-          </a>
+      {items.map((ep, i) => {
+        const vid = ep.videoId || youtubeId(ep.youtube)
+        return (
+        <Reveal as="article" className="episode" key={ep.num + '-' + i} delay={(i % 2) * 0.06} y={28}>
+          {vid ? (
+            <div className="episode-thumb episode-thumb-video">
+              <iframe
+                src={`https://www.youtube.com/embed/${vid}`}
+                title={ep.title}
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+              <span className="episode-ep">EP. {ep.num}</span>
+              {ep.duration && <span className="episode-duration">{ep.duration}</span>}
+            </div>
+          ) : (
+            <a className="episode-thumb" href={ep.youtube} aria-label={`Watch episode ${ep.num}: ${ep.title}`}>
+              <span className="episode-thumb-motif" aria-hidden="true">
+                <StarMotif size={64} stroke="var(--gold-dim)" strokeWidth={0.6} />
+              </span>
+              <span className="episode-ep">EP. {ep.num}</span>
+              <span className="episode-play" aria-hidden="true">▶</span>
+              {ep.duration && <span className="episode-duration">{ep.duration}</span>}
+            </a>
+          )}
 
           <div className="episode-body">
             <div className="episode-byline">
@@ -137,10 +160,11 @@ function EpisodeList({ items }) {
             </div>
             <h3 className="episode-title">{ep.title}</h3>
             <p className="episode-blurb">{ep.blurb}</p>
-            <a href={ep.youtube} className="media-link">Watch on YouTube</a>
+            <a href={ep.youtube} className="media-link" target="_blank" rel="noreferrer">Watch on YouTube</a>
           </div>
         </Reveal>
-      ))}
+        )
+      })}
     </div>
   )
 }
