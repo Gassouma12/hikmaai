@@ -293,9 +293,50 @@
   display: grid;
   grid-template-columns: 0.82fr 1fr;
   gap: 84px;
-  align-items: center;
+  align-items: start;
 }
-.founder-figure { position: relative; max-width: 440px; }
+.founder-figure {
+  position: sticky;
+  top: 110px;
+  align-self: start;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+/* stats live under the photo in the sticky column */
+.founder-figure .founder-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding-top: 26px;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+}
+.founder-figure .stat-item {
+  text-align: center;
+  padding: 14px 6px;
+  background: rgba(255, 253, 248, 0.7);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.founder-figure .stat-num {
+  font-family: var(--font-serif);
+  font-size: 1.7rem;
+  font-weight: 600;
+  color: var(--gold-bright);
+  line-height: 1;
+}
+.founder-figure .stat-label {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 6px;
+  display: block;
+  line-height: 1.3;
+}
 .founder-frame {
   position: relative;
   aspect-ratio: 3 / 4;
@@ -399,7 +440,7 @@
 .stat-label { font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
 @media (max-width: 900px) {
   .founder-inner { grid-template-columns: 1fr; gap: 70px; }
-  .founder-figure { margin: 0 auto; }
+  .founder-figure { margin: 0 auto; position: static; }
 }
 
 /* ─── VISION: sticky aside + editorial list ─── */
@@ -1640,97 +1681,213 @@
   color: var(--ivory-dim);
 }
 
-/* chapter shell */
-.hw-chapter {
-  position: relative;
-  margin: 0 auto 90px;
-  max-width: 1100px;
+/* ─── Card deck (collapsible chapter selector) ─── */
+.hw-deck {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 40px;
 }
-.hw-chapter--amber { --hw-accent: var(--gold-bright); --hw-accent-soft: rgba(212, 175, 55, 0.14); --hw-accent-ink: var(--sand); }
-.hw-chapter--sand  { --hw-accent: #b88e1f;             --hw-accent-soft: rgba(184, 135, 42, 0.13); --hw-accent-ink: var(--sand-light); }
+.hw-card {
+  /* button reset */
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
 
-/* cover banner — Arabic word drifts behind, roman city sits in front */
-.hw-cover {
   position: relative;
   overflow: hidden;
-  text-align: center;
-  padding: 60px 30px 70px;
+  min-height: 360px;
+  padding: 38px 36px 32px;
   border-radius: 22px;
-  background: linear-gradient(150deg, rgba(255, 253, 248, 0.94), rgba(246, 239, 222, 0.78));
-  border: 1px solid var(--border);
-  box-shadow: 0 22px 56px rgba(120, 88, 24, 0.08);
-  margin-bottom: 48px;
+  border: 1px solid var(--border-bright);
+  background-color: var(--card);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 18px 44px rgba(120, 88, 24, 0.1);
+  transition: box-shadow 0.45s var(--ease), border-color 0.45s var(--ease),
+              transform 0.45s var(--ease);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  isolation: isolate;
 }
-.hw-cover-bgword {
+.hw-card--amber { --hw-accent: var(--gold-bright); --hw-accent-soft: rgba(212, 175, 55, 0.14); --hw-accent-ink: var(--sand); }
+.hw-card--sand  { --hw-accent: #b88e1f;             --hw-accent-soft: rgba(184, 135, 42, 0.13); --hw-accent-ink: var(--sand-light); }
+
+/* faint image wash: low-opacity scrim over the bg image so text stays readable */
+.hw-card-shade {
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-serif);
-  font-size: clamp(11rem, 28vw, 22rem);
-  font-weight: 700;
-  color: var(--hw-accent);
-  opacity: 0.07;
-  pointer-events: none;
-  letter-spacing: -0.04em;
   z-index: 0;
-  white-space: nowrap;
-  user-select: none;
+  background:
+    linear-gradient(165deg, rgba(253, 249, 240, 0.92) 0%, rgba(253, 249, 240, 0.72) 55%, rgba(246, 239, 222, 0.78) 100%);
+  pointer-events: none;
+  transition: background 0.5s var(--ease);
 }
-.hw-cover > *:not(.hw-cover-bgword) { position: relative; z-index: 1; }
-.hw-cover-meta {
+.hw-card > *:not(.hw-card-shade) { position: relative; z-index: 1; }
+
+/* idle: faint upward lift + gold edge glow on hover so it reads as clickable */
+.hw-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--hw-accent);
+  box-shadow: 0 26px 60px rgba(184, 135, 42, 0.22), 0 0 0 1px var(--hw-accent);
+}
+.hw-card:hover .hw-card-shade {
+  background:
+    linear-gradient(165deg, rgba(253, 249, 240, 0.86) 0%, rgba(253, 249, 240, 0.6) 55%, rgba(246, 239, 222, 0.7) 100%);
+}
+.hw-card:hover .hw-card-cta-arrow { transform: translateX(6px); }
+.hw-card:focus-visible {
+  outline: 2px solid var(--hw-accent);
+  outline-offset: 4px;
+}
+
+/* active: expand to full row, give it room to breathe */
+.hw-card.is-active {
+  grid-column: 1 / -1;
+  min-height: auto;
+  cursor: default;
+  transform: none;
+  padding: 46px 44px 56px;
+}
+.hw-card.is-active:hover { transform: none; }
+
+/* collapsed: the inactive card shrinks to a slim "Switch chapter" strip
+   placed above the expanded card, so swapping chapters is always one click. */
+.hw-card.is-collapsed {
+  min-height: 0;
+  padding: 16px 22px;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  grid-column: 1 / -1;
+  order: -1;
+  margin-bottom: 6px;
+}
+.hw-card.is-collapsed .hw-card-title {
+  font-size: 1.4rem;
+  margin: 0;
+}
+.hw-card.is-collapsed .hw-card-meta,
+.hw-card.is-collapsed .hw-card-subtitle { display: none; }
+.hw-card.is-collapsed .hw-card-cta {
+  margin: 0 0 0 auto;
+  padding: 10px 18px;
+  font-size: 0.66rem;
+  animation: none;
+}
+
+.hw-card-meta {
   display: inline-flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 24px;
   font-family: var(--font-sans);
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gold);
 }
-.hw-cover-index {
+.hw-card-arabic {
   font-family: var(--font-serif);
-  font-size: 1.05rem;
-  color: var(--hw-accent);
-  letter-spacing: 0.1em;
-  font-weight: 500;
-  text-transform: none;
-}
-.hw-cover-rule {
-  width: 48px; height: 1px;
-  background: linear-gradient(90deg, var(--hw-accent), transparent);
-}
-.hw-cover-era { color: var(--gold-dim); }
-.hw-cover-city {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  line-height: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: center;
-}
-.hw-cover-arabic {
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 500;
+  font-size: 1.2rem;
   color: var(--hw-accent-ink);
   letter-spacing: 0;
+  text-transform: none;
+  font-weight: 500;
 }
-.hw-cover-roman {
-  font-size: clamp(3rem, 6vw, 5rem);
+.hw-card-rule { width: 36px; height: 1px; background: linear-gradient(90deg, var(--hw-accent), transparent); }
+.hw-card-era { color: var(--gold-dim); }
+
+.hw-card-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2.6rem, 5.5vw, 4.2rem);
   font-weight: 400;
+  line-height: 0.98;
   color: var(--ivory);
   letter-spacing: -0.02em;
 }
-.hw-cover-subtitle {
-  margin-top: 18px;
+.hw-card-subtitle {
   font-family: var(--font-serif);
-  font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+  font-size: clamp(1rem, 1.5vw, 1.18rem);
   font-style: italic;
   color: var(--ivory-dim);
+  line-height: 1.4;
+  max-width: 460px;
 }
+.hw-card-cta {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--hw-accent-ink);
+  padding: 14px 22px;
+  background: var(--hw-accent-soft);
+  border: 1px solid var(--hw-accent);
+  border-radius: 999px;
+  align-self: flex-start;
+  box-shadow: 0 0 0 0 var(--hw-accent-soft);
+  animation: hwCardPulse 2.4s ease-in-out infinite;
+}
+.hw-card-cta-arrow {
+  display: inline-block;
+  transition: transform 0.3s var(--ease);
+}
+@keyframes hwCardPulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--hw-accent-soft); }
+  50%      { box-shadow: 0 0 0 8px rgba(212, 175, 55, 0); }
+}
+
+.hw-card-close {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.85);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 2;
+  transition: color 0.3s, border-color 0.3s, background 0.3s;
+}
+.hw-card-close:hover { color: var(--ivory); border-color: var(--gold); background: rgba(255, 253, 248, 1); }
+
+.hw-card-content {
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+
+@media (max-width: 760px) {
+  .hw-deck { grid-template-columns: 1fr; }
+  .hw-card { min-height: 280px; padding: 30px 24px 26px; }
+  .hw-card.is-active { padding: 36px 24px 44px; }
+  .hw-card-close { top: 14px; right: 14px; }
+}
+
+/* chapter shell (inside the expanded card) */
+.hw-chapter {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.hw-chapter--amber { --hw-accent: var(--gold-bright); --hw-accent-soft: rgba(212, 175, 55, 0.14); --hw-accent-ink: var(--sand); }
+.hw-chapter--sand  { --hw-accent: #b88e1f;             --hw-accent-soft: rgba(184, 135, 42, 0.13); --hw-accent-ink: var(--sand-light); }
 
 /* stats row (Timbuktu) */
 .hw-stats {
@@ -2147,29 +2304,6 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--gold);
-}
-
-/* bridge between chapters */
-.hw-bridge {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  max-width: 600px;
-  margin: 30px auto 50px;
-  padding: 0 12px;
-}
-.hw-bridge-line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
-}
-.hw-bridge-arabic {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-size: 0.95rem;
-  color: var(--gold);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
 }
 
 /* responsive: stack rail under content on narrow screens */

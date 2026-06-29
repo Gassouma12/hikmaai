@@ -29,18 +29,27 @@ export default function About() {
               <span className="corner tl" />
               <span className="corner br" />
               <img className="founder-photo" src={mahaPhoto} alt="Maha Jouini, Founder & Director of HIKMA AI" />
+              <div className="founder-folio">01</div>
+              <motion.div
+                className="founder-badge"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4, duration: 0.7 }}
+              >
+                <div className="founder-badge-title">Founder &amp; Director</div>
+                <div className="founder-badge-name">HIKMA AI</div>
+              </motion.div>
             </div>
-            <div className="founder-folio">01</div>
-            <motion.div
-              className="founder-badge"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.7 }}
-            >
-              <div className="founder-badge-title">Founder &amp; Director</div>
-              <div className="founder-badge-name">HIKMA AI</div>
-            </motion.div>
+
+            <div className="founder-stats">
+              {FOUNDER.stats.map((s) => (
+                <div className="stat-item" key={s.label}>
+                  <div className="stat-num"><CountUp value={s.num} /></div>
+                  <div className="stat-label">{s.label}</div>
+                </div>
+              ))}
+            </div>
           </Reveal>
 
           <div className="founder-content">
@@ -70,15 +79,6 @@ export default function About() {
                   </li>
                 ))}
               </ul>
-            </Reveal>
-
-            <Reveal className="founder-stats" delay={0.35}>
-              {FOUNDER.stats.map((s) => (
-                <div className="stat-item" key={s.label}>
-                  <div className="stat-num"><CountUp value={s.num} /></div>
-                  <div className="stat-label">{s.label}</div>
-                </div>
-              ))}
             </Reveal>
           </div>
         </div>
