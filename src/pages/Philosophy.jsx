@@ -4,6 +4,8 @@ import PageTransition from '../components/PageTransition.jsx'
 import Reveal from '../components/Reveal.jsx'
 import Masthead from '../components/Masthead.jsx'
 import StarMotif from '../components/StarMotif.jsx'
+import StarDivider from '../components/StarDivider.jsx'
+import HouseOfWisdom from '../components/HouseOfWisdom.jsx'
 import { PHILOSOPHERS } from '../data/content.js'
 
 export default function Philosophy() {
@@ -62,6 +64,21 @@ export default function Philosophy() {
             )
           })}
         </div>
+      </section>
+
+      <StarDivider />
+
+      {/* ─── House of Wisdom (Baghdad + Timbuktu) ─── */}
+      <section className="section shell">
+        <Masthead
+          align="center"
+          index="✦"
+          arabic="بيت الحكمة"
+          kicker="The House of Wisdom"
+          title={<>Where the <em>Conversation</em> Began</>}
+          lede="Two cities anchored a millennium of inquiry — translating, arguing, and building the methods on which all later science rests. To understand AI ethics today, start here."
+        />
+        <HouseOfWisdom />
       </section>
     </PageTransition>
   )

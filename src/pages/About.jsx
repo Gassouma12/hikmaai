@@ -2,9 +2,10 @@ import { motion } from 'framer-motion'
 import PageTransition from '../components/PageTransition.jsx'
 import Reveal from '../components/Reveal.jsx'
 import Masthead from '../components/Masthead.jsx'
+import StarDivider from '../components/StarDivider.jsx'
 import CountUp from '../components/CountUp.jsx'
 import mahaPhoto from '../images/maha.jpeg'
-import { FOUNDER } from '../data/content.js'
+import { FOUNDER, WHY_HIKMA } from '../data/content.js'
 
 export default function About() {
   return (
@@ -54,8 +55,24 @@ export default function About() {
               ))}
             </Reveal>
             <Reveal as="p" className="founder-quote" delay={0.2}>{FOUNDER.quote}</Reveal>
-            <Reveal as="p" className="founder-bio" delay={0.25}>{FOUNDER.bio}</Reveal>
-            <Reveal className="founder-stats" delay={0.3}>
+
+            {FOUNDER.bioParts.map((p, i) => (
+              <Reveal as="p" className="founder-bio" delay={0.25 + i * 0.04} key={i}>{p}</Reveal>
+            ))}
+
+            <Reveal className="founder-credentials" delay={0.3}>
+              <div className="founder-credentials-kicker">Selected Affiliations</div>
+              <ul className="founder-credentials-list">
+                {FOUNDER.credentials.map((c) => (
+                  <li key={c.role + c.org} className="founder-credential">
+                    <span className="founder-credential-role">{c.role}</span>
+                    <span className="founder-credential-org">{c.org}</span>
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+
+            <Reveal className="founder-stats" delay={0.35}>
               {FOUNDER.stats.map((s) => (
                 <div className="stat-item" key={s.label}>
                   <div className="stat-num"><CountUp value={s.num} /></div>
@@ -64,6 +81,38 @@ export default function About() {
               ))}
             </Reveal>
           </div>
+        </div>
+      </section>
+
+      <StarDivider />
+
+      {/* ─── Why I Founded HIKMA ─── */}
+      <section className="section manifesto">
+        <div className="shell manifesto-inner">
+          <Masthead
+            align="center"
+            index="✦"
+            arabic={WHY_HIKMA.arabic}
+            kicker={WHY_HIKMA.kicker}
+            title={<>{WHY_HIKMA.titlePre} <em>{WHY_HIKMA.titleEm}</em></>}
+          />
+
+          <Reveal className="manifesto-opener" y={20}>
+            <span className="manifesto-mark" aria-hidden="true">“</span>
+            <p>{WHY_HIKMA.opener}</p>
+          </Reveal>
+
+          <div className="manifesto-body">
+            {WHY_HIKMA.body.map((p, i) => (
+              <Reveal as="p" className="manifesto-p" key={i} delay={i * 0.04} y={20}>{p}</Reveal>
+            ))}
+          </div>
+
+          <Reveal className="manifesto-closing" y={24}>
+            <h3 className="manifesto-question">{WHY_HIKMA.closing}</h3>
+            <p className="manifesto-signoff">{WHY_HIKMA.signoff}</p>
+            <p className="manifesto-attr">— Maha Jouini, Founder</p>
+          </Reveal>
         </div>
       </section>
     </PageTransition>

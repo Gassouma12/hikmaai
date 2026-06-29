@@ -68,20 +68,154 @@ export const FOUNDER = {
   label: 'The Voice Behind the Vision',
   name: ['Maha', 'Jouini'],
   roles: [
-    'AI Thought Leader',
     'AI Ethicist',
     'Researcher',
-    'Advocate',
-    'African Voice in AI Governance',
+    'Arabic Writer',
+    'Founder · HIKMA AI',
+    'Founder · CHIFAA',
   ],
   quote:
-    '“My people built the foundations of human knowledge. I am here to ensure that foundation shapes the future — with peace, wisdom, and a deep reverence for our shared humanity.”',
-  bio: 'Maha Jouini is an AI ethicist, researcher, and advocate working at the intersection of technology, ethics, gender, health justice, and African philosophy. She serves in leadership and advisory roles across AI governance initiatives, contributing to continental and international discussions on responsible AI, digital rights, and inclusive technology governance. Her work centers responsible AI in Africa, feminist technology governance, AI and vulnerable communities, data justice, and AI literacy — building technology ecosystems rooted not only in intelligence, but in wisdom.',
-  stats: [
-    { num: '2B+', label: 'Arab & African Voices' },
-    { num: '1,200', label: 'Years of Tradition' },
-    { num: '∞', label: 'Intellectual Legacy' },
+    '“Being realistic means preferring a modest reform that enables another, to an impossible miracle.” — Habib Bourguiba',
+  // Bio rendered as a series of paragraphs so the layout breathes.
+  bioParts: [
+    'Maha Jouini is a North African AI ethicist, researcher, founder, and Arabic writer working at the intersection of artificial intelligence, decolonial technology, health justice, and public-interest innovation. Her work focuses on the governance of AI in contexts too often excluded from mainstream technological design — including African societies, Arabic-speaking communities, women’s health, and vulnerable populations living at the edges of data, language, and power.',
+    'She is the founder of HIKMA AI, a media, research, and public education platform reconnecting artificial intelligence with wisdom, dignity, and the intellectual traditions of Africa and the Arab world. She is also the founder of CHIFAA, a survivor-led AI initiative supporting women living with breast and cervical cancer in North Africa through culturally grounded, multilingual, and ethically governed technology.',
+    'Over more than a decade, Maha has shaped AI policy, digital rights, and public-interest technology agendas across Africa and Europe. She has served as a Research Fellow at the Global Center on AI Governance, a Module Lead for UNESCO’s AI Ethics MOOC, a consultant for GIZ Tunisia, a researcher and supervisor for the Global Index on Responsible AI (GIRAI), and a Digital Transformation Consultant in Mauritania. She is also part of UNFPA Tunisia’s pool of experts contributing to a study on Artificial Intelligence and Technology-Facilitated Gender-Based Violence in Tunisia.',
+    'Her research and policy work focuses on responsible AI, data sovereignty, digital colonialism, and Africa-led approaches to AI governance — including a Springer chapter on Africa-led responsible AI design. She is the winner of the She Shapes AI Global Award in Thought Leadership in AI.',
+    'Alongside her work in technology and policy, Maha is an Arabic writer and short-story author. Her published literary works include A Lover from Africa and The Last Dance: From Carthage to China. Her writing has been recognised as part of contemporary Arab creative production, and her books have been featured by the Centre for Women’s Studies at Tunisia’s Ministry of Women and the National Library of Tunisia.',
   ],
+  // Affiliations rendered as a tidy two-column credentials list.
+  credentials: [
+    { role: 'Research Fellow', org: 'Global Center on AI Governance' },
+    { role: 'Module Lead', org: 'UNESCO · AI Ethics MOOC' },
+    { role: 'Consultant', org: 'GIZ Tunisia' },
+    { role: 'Researcher & Supervisor', org: 'Global Index on Responsible AI (GIRAI)' },
+    { role: 'Digital Transformation Consultant', org: 'Mauritania' },
+    { role: 'Expert Pool', org: 'UNFPA Tunisia · AI & TF-GBV' },
+  ],
+  stats: [
+    { num: '10+', label: 'Years Shaping AI Policy' },
+    { num: '2', label: 'Published Literary Works' },
+    { num: '1', label: 'She Shapes AI Global Award' },
+  ],
+}
+
+// ─── Why I Founded HIKMA (founder's manifesto, shown below the bio) ───
+export const WHY_HIKMA = {
+  arabic: 'لماذا أسستُ حكمة',
+  kicker: 'A Founder’s Manifesto',
+  // The page wraps `titleEm` in <em>.
+  titlePre: 'Why I Founded',
+  titleEm: 'HIKMA',
+  // The opening line, set apart as a pull-quote.
+  opener:
+    'Wisdom without power changes nothing — and power without wisdom destroys everything.',
+  // Body paragraphs.
+  body: [
+    'For too long, the global AI conversation has been built as though Africa and the Arab world exist only to be studied, governed, translated, or “included” after the rules are already written. A 34.7% error rate on dark-skinned faces. Arabic — spoken by more than 400 million people — treated as a low-resource language by the systems that will govern it. Medical AI trained on Western bodies, then deployed on ours. These are not oversights. They are what happens when technology is built without us in the room.',
+    'HIKMA was built from a different premise: that we were never latecomers to knowledge, ethics, or public reason. Long before Silicon Valley, our intellectual traditions built some of the world’s great centres of learning, law, philosophy, and medicine. The question is not whether we have something to contribute to the future of AI. The question is why that future has been allowed to proceed as though our traditions, languages, and communities were intellectually optional.',
+    'Bourguiba once wrote that realism means choosing the modest reform that makes the next one possible. HIKMA is that first reform — not a utopia, but a platform. A media, research, and public education space rooted in wisdom, accountable to our communities, and unwilling to accept that intelligence can be separated from dignity, or technology from moral responsibility.',
+    'I built HIKMA to insist that Africa and the Arab world are not footnotes to the age of artificial intelligence. We are among the voices that must define what ethical, human, and politically accountable AI should be.',
+  ],
+  // Closing rhetorical question + sign-off line, given special typographic weight.
+  closing: 'What does it mean to build intelligence worthy of humanity?',
+  signoff: 'We are its continuation.',
+}
+
+// ─── Bayt al-Hikma · Baghdad ───
+export const BAYT_AL_HIKMA = {
+  city: 'Baghdad',
+  arabic: 'بيت الحكمة',
+  era: 'Founded c. 830 CE',
+  subtitle: 'The House of Wisdom',
+  lede:
+    'At its height, Bayt al-Hikma was not merely a library — it was a civilisation’s metabolism, the organ through which the Abbasid caliphate digested the inherited wisdom of Greece, Persia, and India and transformed it into something entirely new.',
+  body: [
+    'Caliph al-Ma’mun, who founded the institution in its mature form around 830 CE, understood what many rulers before and since have not: that power without knowledge is fragile, and that the accumulation of ideas is the most durable form of conquest.',
+    'Scholars arrived from every corner of the known world. Christians translated Galen and Hippocrates into Arabic. Jewish scholars carried Talmudic logic into dialogue with Aristotle. Zoroastrian astronomers brought Persian star tables that dwarfed anything the Greek tradition had preserved. And Muslim mathematicians — al-Khwarizmi above all — synthesised all of it into entirely new disciplines. The word algebra is his. So, in a manner, is the word algorithm.',
+    'The translation movement was never passive. When Hunayn ibn Ishaq rendered Galenic medicine into Arabic, he did not simply copy; he corrected errors, collated manuscripts, and wrote original commentaries that the Greek originals had not prompted. Ibn al-Haytham set aside intuition in favour of a radical idea: that knowledge of the physical world must be earned through systematic experiment and observation. The telescope Galileo pointed at Jupiter’s moons was, in a real intellectual sense, descended from the darkened room in which Ibn al-Haytham had bent light through a pinhole and measured what he saw.',
+  ],
+  pullquote:
+    '“The caliph reportedly dreamed of Aristotle and awoke resolved to own every word the philosopher had ever written — in Arabic.”',
+  scholars: [
+    { name: 'Al-Khwarizmi', field: 'Mathematics · Astronomy', text: 'Gave the world algebra and the decimal positional system.' },
+    { name: 'Hunayn ibn Ishaq', field: 'Medicine · Translation', text: 'Rendered Galen into Arabic with critical commentary that often improved on the original.' },
+    { name: 'Al-Kindi', field: 'Philosophy · Optics', text: 'First philosopher of the Islamic world; pioneer of cryptography.' },
+    { name: 'Ibn al-Haytham', field: 'Optics · Scientific Method', text: 'His Book of Optics preceded Kepler by six centuries.' },
+  ],
+  westwardTitle: 'The journey westward',
+  westwardIntro: 'Knowledge does not stay where it is made. By the tenth century, the same river of learning that flowed through Baghdad had reached Córdoba, where the Umayyad caliphate had built a rival library said to hold four hundred thousand volumes — more books than existed in all of Christian Europe at the time.',
+  timeline: [
+    { year: 'c. 830 CE', text: 'Al-Ma’mun establishes Bayt al-Hikma; the state translation programme begins.' },
+    { year: 'c. 1000 CE', text: 'Córdoba becomes Baghdad’s western twin, drawing European scholars south across the Pyrenees.' },
+    { year: 'c. 1120 CE', text: 'Adelard of Bath returns to England with Arabic manuscripts — Euclid, astronomical tables, natural philosophy: the seed-packet of the European scientific revolution.' },
+    { year: '1258 CE', text: 'The Mongol sack of Baghdad ends the Abbasid caliphate. The Tigris is said to have run black with ink. But the knowledge had already moved westward — into the hands of those who would build on it.' },
+  ],
+  closing:
+    'The deeper inheritance of the House of Wisdom is not the algebra, though we use it daily. Not the astronomical tables, though they guided Columbus. The inheritance is the method: the conviction that knowledge belongs to no single civilisation, and that the accumulated light of every culture, translated patiently into a common tongue, is brighter than any one flame burning alone.',
+}
+
+// ─── Timbuktu · Sankore ───
+export const TIMBUKTU = {
+  city: 'Timbuktu',
+  arabic: 'تمبكتو',
+  era: '12th – 17th centuries CE',
+  subtitle: 'Intellectual Capital of Sub-Saharan Africa',
+  lede:
+    'Long before the word “university” had settled into the European mind, Timbuktu was already a city of scholars. Its libraries were not curiosities or royal hoards — they were living institutions, passed from generation to generation within families who understood manuscripts to be sacred inheritances, as weighty as land.',
+  stats: [
+    { num: '25,000', label: 'Students at Sankore at its peak' },
+    { num: '700K+', label: 'Manuscripts surviving today' },
+    { num: '40+', label: 'Books authored by Ahmad Baba' },
+  ],
+  body: [
+    'The Sankore Madrasah grew from a mosque founded in 989 CE and by the 12th century had become something far larger than a place of worship. It was a confederation of independent colleges, each anchored by a master scholar who granted authorisation to teach only after years of rigorous study. The highest degree — equivalent to a doctorate — took a decade to earn and required an original written work, the Risaleh. Graduates were recognised across the Muslim world.',
+    'Subjects ranged across theology and law, but the curriculum was not narrowly religious. Mathematics, astronomy, medicine and surgery, philosophy, geography, chemistry, and linguistics all had their place. Students also trained in trade and craftsmanship — carpentry, navigation, agriculture, tailoring — because Sankore understood that the life of the mind and the life of the market were not enemies.',
+  ],
+  subjects: [
+    'Theology & Law',
+    'Mathematics',
+    'Astronomy',
+    'Medicine & Surgery',
+    'Philosophy',
+    'Geography & History',
+    'Chemistry & Physics',
+    'Trade & Navigation',
+    'Language & Linguistics',
+  ],
+  pullquote:
+    '“Many Timbuktu scholars possessed personal libraries of hundreds or thousands of books. Masters delivered authorisation to teach specific texts to their students — the prestige depended on the pedigree of the scholar.”',
+  pullattr: '— Ousmane Oumar Kane, Beyond Timbuktu',
+  scholars: [
+    { name: 'Ahmad Baba al-Timbukti', field: 'Last Chancellor of Sankore', text: 'Grammarian, philosopher, author of over forty works. His personal library held 1,600 volumes. Exiled to Morocco in 1591; his captors reportedly marvelled at his erudition.' },
+    { name: 'Mahmud Kati', field: 'Chronicler · Historian', text: 'His Tarikh al-Fattash documented the Songhai Empire with the precision of a modern archivist. He recorded a meteor shower in 1593 with the eye of a natural philosopher.' },
+    { name: 'Al-Qadi Aqib ibn Mahmud', field: 'Founder of Sankore Mosque', text: 'Chief judge of Timbuktu, founded the mosque in 989 CE — the seed from which the university grew. A wealthy Mandinka woman funded its full institutional development.' },
+    { name: 'Ibn Yunus (via Timbuktu)', field: 'Astronomy', text: 'The Egyptian astronomer’s tables were copied and taught here. Surviving pages dense with star data prove that the city tracked the heavens with the same tools as Cairo and Baghdad.' },
+  ],
+  manuscriptsTitle: 'What the manuscripts contain',
+  manuscriptsBody:
+    'The surviving manuscripts range from short private letters to multi-volume legal encyclopaedias. Scribes in Timbuktu translated Plato, Hippocrates, and Avicenna. Local authors wrote original treatises on jurisprudence, the movement of stars in relation to the Islamic calendar, and the therapeutic properties of desert plants. Written primarily in Arabic — the lingua franca of Islamic scholarship — but also in local languages rendered in Arabic script: Fula, Songhay, Tamasheq, Bambara, Soninke. Africa was not consuming knowledge from elsewhere and leaving no trace of itself. It was producing knowledge in its own languages, in its own voice.',
+  timeline: [
+    { year: '989 CE', text: 'Al-Qadi Aqib founds the Sankore Mosque. A wealthy Mandinka woman funds its development into a centre of learning.' },
+    { year: '1324', text: 'Mansa Musa returns from Mecca with architect Es Saheli, who builds the mosques and academies that define Timbuktu’s skyline. European mapmakers begin to draw him on their charts — a Black sovereign equal to any Christian king.' },
+    { year: '12th–16th c.', text: 'Golden age. Sankore enrols 25,000 students. Private libraries proliferate. Timbuktu becomes the intellectual capital of sub-Saharan Africa.' },
+    { year: '1591', text: 'Moroccan invasion. The Songhai Empire falls. Ahmad Baba is exiled to Marrakesh. The city begins its long intellectual decline, though libraries survive in private hands for centuries more.' },
+    { year: '1893', text: 'French colonial rule. Arabic education is systematically marginalised. Manuscripts are sold off piecemeal.' },
+    { year: '2012–13', text: 'Islamist occupation. The greatest threat in centuries to a record that had survived invasion, drought, and colonial erasure.' },
+  ],
+  crisis: {
+    title: 'The Crisis of 2012',
+    body: 'When Ansar Dine seized Timbuktu, the world feared the destruction of one of humanity’s irreplaceable archives. 4,203 manuscripts were burned or stolen. But led by Dr. Abdel Kader Haidara and Stephanie Diakite, local families hid thousands of manuscripts in their homes, then smuggled approximately 350,000 of them to safety in Bamako — transported in footlockers, suitcases, and grain sacks, slipped past checkpoints in the dark.',
+    stats: [
+      { num: '350,000', label: 'Manuscripts rescued to Bamako' },
+      { num: '150,000+', label: 'Digitised by HMML since 2013' },
+    ],
+  },
+  closing:
+    'The Timbuktu manuscripts do not merely prove that Africa had a written intellectual tradition — they prove that it had one sophisticated enough to engage, on equal terms, with the great questions that occupied scholars from Baghdad to Córdoba to Cairo. They contain original thought, not just transcription. They contain dissent, not just orthodoxy. They contain science conducted through observation of the actual sky above the actual Sahara.',
+  custodianQuote:
+    '“It is traditional for a family member to swear publicly that he will protect the library for as long as he lives.”',
+  custodianAttr: '— On Timbuktu’s manuscript custodians',
 }
 
 // ─── Vision ───
