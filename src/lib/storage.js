@@ -1,28 +1,54 @@
 import { useEffect, useState } from 'react'
 
 /**
- * Tiny localStorage-backed React state hook. No backend yet, so admin-added
- * podcasts/articles live in the browser only. Storage keys are namespaced under
- * `hikma:`. Returns `[value, setValue]` like useState.
+ * localStorage-backed React state hook with cross-instance + cross-tab sync.
+ * Multiple components using `useStorage('outreach', [])` stay in lockstep:
+ *  • Same-tab updates fire a custom event that every hook subscribes to.
+ *  • Other-tab updates arrive via the native `storage` event.
  */
+const EVENT = 'hikma-storage-change'
+
+function read(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw) : fallback
+  } catch {
+    return fallback
+  }
+}
+
 export function useStorage(key, fallback) {
   const fullKey = `hikma:${key}`
-  const [value, setValue] = useState(() => {
-    try {
-      const raw = localStorage.getItem(fullKey)
-      return raw ? JSON.parse(raw) : fallback
-    } catch {
-      return fallback
-    }
-  })
+  const [value, setValueState] = useState(() => read(fullKey, fallback))
 
+  // Subscribe to same-tab + cross-tab changes.
   useEffect(() => {
-    try {
-      localStorage.setItem(fullKey, JSON.stringify(value))
-    } catch {
-      /* quota exceeded etc. — silently no-op */
+    const sync = (e) => {
+      if (e instanceof StorageEvent) {
+        if (e.key !== fullKey) return
+      } else if (e.detail !== fullKey) return
+      setValueState(read(fullKey, fallback))
     }
-  }, [fullKey, value])
+    window.addEventListener('storage', sync)
+    window.addEventListener(EVENT, sync)
+    return () => {
+      window.removeEventListener('storage', sync)
+      window.removeEventListener(EVENT, sync)
+    }
+    // fallback intentionally omitted: should be a stable seed value
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fullKey])
+
+  const setValue = (next) => {
+    setValueState((prev) => {
+      const resolved = typeof next === 'function' ? next(prev) : next
+      try {
+        localStorage.setItem(fullKey, JSON.stringify(resolved))
+        window.dispatchEvent(new CustomEvent(EVENT, { detail: fullKey }))
+      } catch { /* quota etc. */ }
+      return resolved
+    })
+  }
 
   return [value, setValue]
 }

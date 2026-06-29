@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import PageTransition from '../components/PageTransition.jsx'
 import Masthead from '../components/Masthead.jsx'
 import AdminPodcasts from '../components/AdminPodcasts.jsx'
 import AdminArticles from '../components/AdminArticles.jsx'
+import AdminInbox from '../components/AdminInbox.jsx'
+import { useStorage } from '../lib/storage.js'
 
 const PASSWORD = 'MahaHikma123'
 const AUTH_KEY = 'hikma:admin-auth'
@@ -12,6 +14,11 @@ export default function Admin() {
   // fresh tab doesn't.
   const [authed, setAuthed] = useState(() => sessionStorage.getItem(AUTH_KEY) === 'ok')
   const [tab, setTab] = useState('podcasts')
+
+  // Subscribed here so the unread pill updates live when the inbox marks
+  // messages as read in the sibling tab.
+  const [outreach] = useStorage('outreach', [])
+  const unread = useMemo(() => outreach.filter((o) => !o.read).length, [outreach])
 
   if (!authed) return <Gate onAuth={() => { sessionStorage.setItem(AUTH_KEY, 'ok'); setAuthed(true) }} />
 
@@ -28,22 +35,12 @@ export default function Admin() {
         />
 
         <div className="admin-tabs" role="tablist">
-          <button
-            role="tab"
-            aria-selected={tab === 'podcasts'}
-            className={`admin-tab ${tab === 'podcasts' ? 'is-active' : ''}`}
-            onClick={() => setTab('podcasts')}
-          >
-            Podcasts
-          </button>
-          <button
-            role="tab"
-            aria-selected={tab === 'articles'}
-            className={`admin-tab ${tab === 'articles' ? 'is-active' : ''}`}
-            onClick={() => setTab('articles')}
-          >
-            Articles
-          </button>
+          <Tab id="podcasts" tab={tab} setTab={setTab}>Podcasts</Tab>
+          <Tab id="articles" tab={tab} setTab={setTab}>Articles</Tab>
+          <Tab id="inbox" tab={tab} setTab={setTab}>
+            Inbox
+            {unread > 0 && <span className="admin-tab-badge" aria-label={`${unread} unread`}>{unread}</span>}
+          </Tab>
           <button
             className="admin-logout"
             onClick={() => { sessionStorage.removeItem(AUTH_KEY); setAuthed(false) }}
@@ -52,9 +49,25 @@ export default function Admin() {
           </button>
         </div>
 
-        {tab === 'podcasts' ? <AdminPodcasts /> : <AdminArticles />}
+        {tab === 'podcasts' && <AdminPodcasts />}
+        {tab === 'articles' && <AdminArticles />}
+        {tab === 'inbox' && <AdminInbox />}
       </div>
     </PageTransition>
+  )
+}
+
+function Tab({ id, tab, setTab, children }) {
+  const active = tab === id
+  return (
+    <button
+      role="tab"
+      aria-selected={active}
+      className={`admin-tab ${active ? 'is-active' : ''}`}
+      onClick={() => setTab(id)}
+    >
+      {children}
+    </button>
   )
 }
 

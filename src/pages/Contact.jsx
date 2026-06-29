@@ -8,6 +8,7 @@ import Reveal from '../components/Reveal.jsx'
 import StarMotif from '../components/StarMotif.jsx'
 import StarDivider from '../components/StarDivider.jsx'
 import { CONTACT } from '../data/content.js'
+import { useStorage } from '../lib/storage.js'
 
 const fmtSize = (bytes) => {
   if (bytes < 1024) return `${bytes} B`
@@ -21,6 +22,7 @@ export default function Contact() {
   const [dragging, setDragging] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const fileInputRef = useRef(null)
+  const [outreach, setOutreach] = useStorage('outreach', [])
 
   const addFiles = (list) => {
     const pdfs = Array.from(list).filter((f) => f.type === 'application/pdf')
@@ -39,7 +41,18 @@ export default function Contact() {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // No backend yet — show the success state. (Wire to an email/API service later.)
+    const fd = new FormData(e.currentTarget)
+    const entry = {
+      id: Date.now(),
+      purpose,
+      name: fd.get('name')?.toString().trim() || '',
+      email: fd.get('email')?.toString().trim() || '',
+      message: fd.get('message')?.toString().trim() || '',
+      attachments: files.map((f) => ({ name: f.name, size: f.size })),
+      createdAt: new Date().toISOString(),
+      read: false,
+    }
+    setOutreach([entry, ...outreach])
     setSubmitted(true)
   }
 
