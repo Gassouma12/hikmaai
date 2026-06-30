@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { uploadImage } from '../lib/supabase.js'
 
 /**
  * Minimal contenteditable rich-text editor used by the admin article composer.
@@ -28,6 +29,7 @@ const COLORS = ['#1a1a1a', '#45433d', '#9a7a22', '#d4af37', '#b5642f', '#00696b'
 export default function RichTextEditor({ value, onChange, placeholder = 'Write your article…' }) {
   const ref = useRef(null)
   const fileRef = useRef(null)
+  const [uploading, setUploading] = useState(false)
 
   // Initial mount: load saved HTML once. Don't re-sync from `value` afterward —
   // doing so would move the caret on every keystroke.
@@ -51,13 +53,19 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Write y
   }
 
   const insertImage = () => fileRef.current?.click()
-  const onFile = (e) => {
+  const onFile = async (e) => {
     const f = e.target.files?.[0]
-    if (!f) return
-    const reader = new FileReader()
-    reader.onload = () => exec('insertImage', reader.result)
-    reader.readAsDataURL(f)
     e.target.value = ''
+    if (!f) return
+    setUploading(true)
+    try {
+      const url = await uploadImage(f, 'inline')
+      exec('insertImage', url)
+    } catch (err) {
+      alert(`Image upload failed: ${err.message}`)
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (
@@ -113,7 +121,9 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Write y
 
         <Group>
           <ToolBtn onClick={insertLink}  title="Insert link">🔗 Link</ToolBtn>
-          <ToolBtn onClick={insertImage} title="Insert image">🖼 Image</ToolBtn>
+          <ToolBtn onClick={insertImage} title="Insert image" disabled={uploading}>
+            {uploading ? '⏳ Uploading…' : '🖼 Image'}
+          </ToolBtn>
           <ToolBtn onClick={() => exec('removeFormat')} title="Clear formatting">⌫ Clear</ToolBtn>
         </Group>
 
@@ -136,9 +146,16 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Write y
 function Group({ children, className = '', ...rest }) {
   return <div className={`rte-group ${className}`} {...rest}>{children}</div>
 }
-function ToolBtn({ onClick, title, children }) {
+function ToolBtn({ onClick, title, children, disabled }) {
   return (
-    <button type="button" className="rte-btn" onMouseDown={(e) => e.preventDefault()} onClick={onClick} title={title}>
+    <button
+      type="button"
+      className="rte-btn"
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+      title={title}
+      disabled={disabled}
+    >
       {children}
     </button>
   )

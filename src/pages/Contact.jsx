@@ -8,7 +8,7 @@ import Reveal from '../components/Reveal.jsx'
 import StarMotif from '../components/StarMotif.jsx'
 import StarDivider from '../components/StarDivider.jsx'
 import { CONTACT } from '../data/content.js'
-import { useStorage } from '../lib/storage.js'
+import { supabase } from '../lib/supabase.js'
 
 const fmtSize = (bytes) => {
   if (bytes < 1024) return `${bytes} B`
@@ -21,8 +21,9 @@ export default function Contact() {
   const [files, setFiles] = useState([])
   const [dragging, setDragging] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sendErr, setSendErr] = useState('')
   const fileInputRef = useRef(null)
-  const [outreach, setOutreach] = useStorage('outreach', [])
 
   const addFiles = (list) => {
     const pdfs = Array.from(list).filter((f) => f.type === 'application/pdf')
@@ -39,20 +40,26 @@ export default function Contact() {
     if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    if (sending) return
+    setSending(true)
+    setSendErr('')
     const fd = new FormData(e.currentTarget)
     const entry = {
-      id: Date.now(),
       purpose,
       name: fd.get('name')?.toString().trim() || '',
       email: fd.get('email')?.toString().trim() || '',
       message: fd.get('message')?.toString().trim() || '',
       attachments: files.map((f) => ({ name: f.name, size: f.size })),
-      createdAt: new Date().toISOString(),
       read: false,
     }
-    setOutreach([entry, ...outreach])
+    const { error } = await supabase.from('outreach').insert(entry)
+    setSending(false)
+    if (error) {
+      setSendErr('Could not send right now. Please try again, or email us directly.')
+      return
+    }
     setSubmitted(true)
   }
 
@@ -216,9 +223,10 @@ export default function Contact() {
                     )}
                   </div>
 
-                  <button type="submit" className="btn btn-primary contact-submit">
-                    <Send className="contact-submit-icon" /> Send Message
+                  <button type="submit" className="btn btn-primary contact-submit" disabled={sending}>
+                    <Send className="contact-submit-icon" /> {sending ? 'Sending…' : 'Send Message'}
                   </button>
+                  {sendErr && <p className="contact-form-note" style={{ color: 'var(--copper-light)' }}>{sendErr}</p>}
                   <p className="contact-form-note">{CONTACT.note}</p>
                 </motion.form>
               )}

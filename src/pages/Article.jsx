@@ -4,12 +4,16 @@ import PageTransition from '../components/PageTransition.jsx'
 import Reveal from '../components/Reveal.jsx'
 import StarDivider from '../components/StarDivider.jsx'
 import { ARTICLES } from '../data/content.js'
-import { useStorage } from '../lib/storage.js'
+import { useTable } from '../lib/api.js'
 
 export default function Article() {
   const { id } = useParams()
-  const [userArticles] = useStorage('articles', [])
-  const all = useMemo(() => [...userArticles, ...ARTICLES], [userArticles])
+  const [userArticles] = useTable('articles')
+  // Map snake_case → camelCase so the existing JSX (article.readTime, etc.) works.
+  const all = useMemo(() => [
+    ...userArticles.map((a) => ({ ...a, readTime: a.read_time })),
+    ...ARTICLES,
+  ], [userArticles])
   const article = useMemo(() => all.find((a) => String(a.id) === String(id)), [id, all])
 
   if (!article) return <NotFound />

@@ -1,30 +1,48 @@
 import { useState } from 'react'
-import { useStorage, youtubeId, youtubeThumb } from '../lib/storage.js'
+import { useTable } from '../lib/api.js'
+import { youtubeId, youtubeThumb } from '../lib/storage.js'
 
 /**
- * Podcast episode editor. Adds new episodes to localStorage which the public
- * Media page merges with the seeded EPISODES from content.js. Each episode
- * keeps the same shape as the seed data (num, title, blurb, youtube, etc.)
- * plus a `videoId` for embedding the preview.
+ * Podcast episode editor. Rows live in Supabase `episodes` table; realtime
+ * updates flow back via useTable. Field naming follows Postgres snake_case
+ * (video_id, created_at). The public Media page maps these to the legacy
+ * camelCase fields the existing episode card expects.
  */
 export default function AdminPodcasts() {
-  const [episodes, setEpisodes] = useStorage('episodes', [])
+  const [episodes, { insert, remove, loading }] = useTable('episodes')
   const [draft, setDraft] = useState(blank())
+  const [busy, setBusy] = useState(false)
   const id = youtubeId(draft.youtube)
   const formValid = id && draft.title.trim() && draft.blurb.trim()
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
-    if (!formValid) return
-    const nextNum = String(episodes.length + 1).padStart(2, '0')
-    const ep = { ...draft, num: nextNum, videoId: id, date: today(), createdAt: Date.now() }
-    setEpisodes([ep, ...episodes])
-    setDraft(blank())
+    if (!formValid || busy) return
+    setBusy(true)
+    try {
+      const nextNum = String((episodes?.length || 0) + 1).padStart(2, '0')
+      await insert({
+        num: nextNum,
+        title: draft.title,
+        blurb: draft.blurb,
+        guest: draft.guest || null,
+        role: draft.role || null,
+        duration: draft.duration || null,
+        date: today(),
+        youtube: draft.youtube,
+        video_id: id,
+      })
+      setDraft(blank())
+    } catch (err) {
+      alert(`Could not publish: ${err.message}`)
+    } finally {
+      setBusy(false)
+    }
   }
 
-  const remove = (createdAt) => {
+  const onDelete = async (epId) => {
     if (!window.confirm('Delete this episode?')) return
-    setEpisodes(episodes.filter((e) => e.createdAt !== createdAt))
+    try { await remove(epId) } catch (err) { alert(`Could not delete: ${err.message}`) }
   }
 
   return (
@@ -106,10 +124,10 @@ export default function AdminPodcasts() {
           )}
 
           <div className="admin-actions">
-            <button type="submit" className="admin-btn admin-btn-primary" disabled={!formValid}>
-              Publish episode
+            <button type="submit" className="admin-btn admin-btn-primary" disabled={!formValid || busy}>
+              {busy ? 'Publishing…' : 'Publish episode'}
             </button>
-            <button type="button" className="admin-btn" onClick={() => setDraft(blank())}>
+            <button type="button" className="admin-btn" onClick={() => setDraft(blank())} disabled={busy}>
               Reset
             </button>
           </div>
@@ -117,21 +135,24 @@ export default function AdminPodcasts() {
       </section>
 
       <section className="admin-section">
-        <h2 className="admin-section-title">Published Episodes <span className="admin-count">{episodes.length}</span></h2>
-        {episodes.length === 0 ? (
+        <h2 className="admin-section-title">
+          Published Episodes
+          <span className="admin-count">{loading ? '…' : episodes.length}</span>
+        </h2>
+        {episodes.length === 0 && !loading ? (
           <p className="admin-empty">No episodes yet. Publish your first above.</p>
         ) : (
           <ul className="admin-list">
             {episodes.map((ep) => (
-              <li key={ep.createdAt} className="admin-list-item">
-                <img className="admin-list-thumb" src={youtubeThumb(ep.videoId)} alt="" />
+              <li key={ep.id} className="admin-list-item">
+                <img className="admin-list-thumb" src={youtubeThumb(ep.video_id)} alt="" />
                 <div className="admin-list-body">
                   <div className="admin-list-meta">EP. {ep.num} · {ep.date}</div>
                   <h3 className="admin-list-title">{ep.title}</h3>
                   <p className="admin-list-blurb">{ep.blurb}</p>
                   {ep.guest && <div className="admin-list-byline">with {ep.guest}{ep.role ? ` · ${ep.role}` : ''}</div>}
                 </div>
-                <button className="admin-btn admin-btn-danger" onClick={() => remove(ep.createdAt)}>Delete</button>
+                <button className="admin-btn admin-btn-danger" onClick={() => onDelete(ep.id)}>Delete</button>
               </li>
             ))}
           </ul>

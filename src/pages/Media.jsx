@@ -7,7 +7,8 @@ import Masthead from '../components/Masthead.jsx'
 import StarMotif from '../components/StarMotif.jsx'
 import CountUp from '../components/CountUp.jsx'
 import { PODCAST, EPISODES, ARTICLES } from '../data/content.js'
-import { useStorage, youtubeId } from '../lib/storage.js'
+import { youtubeId } from '../lib/storage.js'
+import { useTable } from '../lib/api.js'
 
 const PAGE_SIZE = 5
 
@@ -15,11 +16,11 @@ export default function Media() {
   const [tab, setTab] = useState('episodes') // 'episodes' | 'articles'
   const [page, setPage] = useState(1)
 
-  // Merge admin-added entries (localStorage) with the seeded ones.
-  const [userEpisodes] = useStorage('episodes', [])
-  const [userArticles] = useStorage('articles', [])
-  const allEpisodes = useMemo(() => [...userEpisodes, ...EPISODES], [userEpisodes])
-  const allArticles = useMemo(() => [...userArticles, ...ARTICLES], [userArticles])
+  // Merge Supabase-published entries with the seeded ones in content.js.
+  const [userEpisodes] = useTable('episodes')
+  const [userArticles] = useTable('articles')
+  const allEpisodes = useMemo(() => [...userEpisodes.map(mapEpisode), ...EPISODES], [userEpisodes])
+  const allArticles = useMemo(() => [...userArticles.map(mapArticle), ...ARTICLES], [userArticles])
 
   // Source list + pagination derived together so a tab swap also resets to page 1.
   const list = tab === 'episodes' ? allEpisodes : allArticles
@@ -125,7 +126,7 @@ function EpisodeList({ items }) {
   return (
     <div className="episode-list">
       {items.map((ep, i) => {
-        const vid = ep.videoId || youtubeId(ep.youtube)
+        const vid = ep.videoId || ep.video_id || youtubeId(ep.youtube)
         return (
         <Reveal as="article" className="episode" key={ep.num + '-' + i} delay={(i % 2) * 0.06} y={28}>
           {vid ? (
@@ -231,4 +232,13 @@ function Pagination({ page, pageCount, onChange }) {
       </button>
     </nav>
   )
+}
+
+/* Supabase rows use snake_case; the existing components expect camelCase
+   keys on a few fields. These tiny mappers keep the rest of the file the same. */
+function mapEpisode(row) {
+  return { ...row, videoId: row.video_id }
+}
+function mapArticle(row) {
+  return { ...row, readTime: row.read_time }
 }

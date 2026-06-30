@@ -1,35 +1,37 @@
 import { useRef, useState } from 'react'
 import RichTextEditor from './RichTextEditor.jsx'
-import { useStorage } from '../lib/storage.js'
+import { useTable } from '../lib/api.js'
+import { uploadImage } from '../lib/supabase.js'
 
 /**
- * Article composer. Admin can:
- *  • List existing user-created articles
- *  • Compose a new one with banner image, metadata, and rich body HTML
- *  • Delete + edit existing ones
+ * Article composer. Rows live in Supabase `articles`; banner images live in
+ * the `media` storage bucket. Field naming = snake_case (read_time, etc.) to
+ * match Postgres. Body is rich HTML written by RichTextEditor.
  */
 export default function AdminArticles() {
-  const [articles, setArticles] = useStorage('articles', [])
-  const [editing, setEditing] = useState(null) // id being edited, 'new', or null
+  const [articles, { insert, update, remove, loading }] = useTable('articles')
+  const [editing, setEditing] = useState(null)   // article id, 'new', or null
 
   const startNew = () => setEditing('new')
   const startEdit = (id) => setEditing(id)
   const close = () => setEditing(null)
 
-  const save = (draft) => {
-    if (editing === 'new') {
-      const id = (articles.length ? Math.max(...articles.map((a) => a.id)) : 1000) + 1
-      const next = { ...draft, id, createdAt: Date.now() }
-      setArticles([next, ...articles])
-    } else {
-      setArticles(articles.map((a) => a.id === editing ? { ...a, ...draft, updatedAt: Date.now() } : a))
+  const save = async (draft) => {
+    try {
+      if (editing === 'new') {
+        await insert({ ...draft })
+      } else {
+        await update(editing, { ...draft, updated_at: new Date().toISOString() })
+      }
+      close()
+    } catch (err) {
+      alert(`Could not save: ${err.message}`)
     }
-    close()
   }
 
-  const remove = (id) => {
+  const onDelete = async (id) => {
     if (!window.confirm('Delete this article?')) return
-    setArticles(articles.filter((a) => a.id !== id))
+    try { await remove(id) } catch (err) { alert(`Could not delete: ${err.message}`) }
   }
 
   const current = editing === 'new'
@@ -41,11 +43,14 @@ export default function AdminArticles() {
       {editing == null ? (
         <section className="admin-section">
           <div className="admin-section-head">
-            <h2 className="admin-section-title">Articles <span className="admin-count">{articles.length}</span></h2>
+            <h2 className="admin-section-title">
+              Articles
+              <span className="admin-count">{loading ? '…' : articles.length}</span>
+            </h2>
             <button className="admin-btn admin-btn-primary" onClick={startNew}>+ New article</button>
           </div>
 
-          {articles.length === 0 ? (
+          {articles.length === 0 && !loading ? (
             <p className="admin-empty">No articles yet. Click <em>New article</em> to write your first.</p>
           ) : (
             <ul className="admin-list">
@@ -59,7 +64,7 @@ export default function AdminArticles() {
                   </div>
                   <div className="admin-list-actions">
                     <button className="admin-btn" onClick={() => startEdit(a.id)}>Edit</button>
-                    <button className="admin-btn admin-btn-danger" onClick={() => remove(a.id)}>Delete</button>
+                    <button className="admin-btn admin-btn-danger" onClick={() => onDelete(a.id)}>Delete</button>
                   </div>
                 </li>
               ))}
@@ -80,34 +85,47 @@ export default function AdminArticles() {
 
 function ArticleForm({ initial, onSave, onCancel, mode }) {
   const [draft, setDraft] = useState(() => initial ? { ...initial } : blank())
+  const [busy, setBusy] = useState(false)
   const fileRef = useRef(null)
 
   const update = (patch) => setDraft((d) => ({ ...d, ...patch }))
 
   const pickBanner = () => fileRef.current?.click()
-  const onBanner = (e) => {
+  const onBanner = async (e) => {
     const f = e.target.files?.[0]
-    if (!f) return
-    const r = new FileReader()
-    r.onload = () => update({ cover: r.result })
-    r.readAsDataURL(f)
     e.target.value = ''
+    if (!f) return
+    setBusy(true)
+    try {
+      const url = await uploadImage(f, 'banners')
+      update({ cover: url })
+    } catch (err) {
+      alert(`Image upload failed: ${err.message}`)
+    } finally {
+      setBusy(false)
+    }
   }
 
   const valid = draft.title.trim() && draft.body && draft.body.trim()
+
+  const handleSave = async () => {
+    setBusy(true)
+    await onSave(draft)
+    setBusy(false)
+  }
 
   return (
     <section className="admin-section">
       <div className="admin-section-head">
         <h2 className="admin-section-title">{mode === 'new' ? 'New Article' : 'Edit Article'}</h2>
         <div className="admin-actions">
-          <button className="admin-btn" onClick={onCancel}>Cancel</button>
+          <button className="admin-btn" onClick={onCancel} disabled={busy}>Cancel</button>
           <button
             className="admin-btn admin-btn-primary"
-            disabled={!valid}
-            onClick={() => onSave(draft)}
+            disabled={!valid || busy}
+            onClick={handleSave}
           >
-            {mode === 'new' ? 'Publish' : 'Save changes'}
+            {busy ? 'Saving…' : (mode === 'new' ? 'Publish' : 'Save changes')}
           </button>
         </div>
       </div>
@@ -115,32 +133,32 @@ function ArticleForm({ initial, onSave, onCancel, mode }) {
       <div className="admin-grid-2">
         <label className="admin-field">
           <span>Title</span>
-          <input value={draft.title} onChange={(e) => update({ title: e.target.value })} placeholder="Article title" />
+          <input value={draft.title || ''} onChange={(e) => update({ title: e.target.value })} placeholder="Article title" />
         </label>
         <label className="admin-field">
           <span>Tag (e.g. Essay, Field Notes)</span>
-          <input value={draft.tag} onChange={(e) => update({ tag: e.target.value })} placeholder="Essay" />
+          <input value={draft.tag || ''} onChange={(e) => update({ tag: e.target.value })} placeholder="Essay" />
         </label>
       </div>
 
       <div className="admin-grid-3">
         <label className="admin-field">
           <span>Author</span>
-          <input value={draft.author} onChange={(e) => update({ author: e.target.value })} placeholder="Maha Jouini" />
+          <input value={draft.author || ''} onChange={(e) => update({ author: e.target.value })} placeholder="Maha Jouini" />
         </label>
         <label className="admin-field">
           <span>Author role</span>
-          <input value={draft.role} onChange={(e) => update({ role: e.target.value })} placeholder="Founder · HIKMA AI" />
+          <input value={draft.role || ''} onChange={(e) => update({ role: e.target.value })} placeholder="Founder · HIKMA AI" />
         </label>
         <label className="admin-field">
           <span>Read time</span>
-          <input value={draft.readTime} onChange={(e) => update({ readTime: e.target.value })} placeholder="8 min read" />
+          <input value={draft.read_time || ''} onChange={(e) => update({ read_time: e.target.value })} placeholder="8 min read" />
         </label>
       </div>
 
       <label className="admin-field">
         <span>Excerpt (1–2 sentences shown on the card)</span>
-        <textarea rows={2} value={draft.excerpt} onChange={(e) => update({ excerpt: e.target.value })} />
+        <textarea rows={2} value={draft.excerpt || ''} onChange={(e) => update({ excerpt: e.target.value })} />
       </label>
 
       <div className="admin-banner-row">
@@ -150,13 +168,13 @@ function ArticleForm({ initial, onSave, onCancel, mode }) {
             <div className="admin-banner-preview">
               <img src={draft.cover} alt="Banner preview" />
               <div className="admin-banner-actions">
-                <button className="admin-btn" onClick={pickBanner}>Replace</button>
-                <button className="admin-btn admin-btn-danger" onClick={() => update({ cover: '' })}>Remove</button>
+                <button className="admin-btn" onClick={pickBanner} disabled={busy}>{busy ? 'Uploading…' : 'Replace'}</button>
+                <button className="admin-btn admin-btn-danger" onClick={() => update({ cover: '' })} disabled={busy}>Remove</button>
               </div>
             </div>
           ) : (
-            <button className="admin-btn admin-banner-pick" onClick={pickBanner}>
-              Upload banner image
+            <button className="admin-btn admin-banner-pick" onClick={pickBanner} disabled={busy}>
+              {busy ? 'Uploading…' : 'Upload banner image'}
             </button>
           )}
           <input ref={fileRef} type="file" accept="image/*" hidden onChange={onBanner} />
@@ -165,7 +183,7 @@ function ArticleForm({ initial, onSave, onCancel, mode }) {
 
       <div className="admin-field">
         <span>Body</span>
-        <RichTextEditor value={draft.body} onChange={(html) => update({ body: html })} />
+        <RichTextEditor value={draft.body || ''} onChange={(html) => update({ body: html })} />
       </div>
     </section>
   )
@@ -173,7 +191,7 @@ function ArticleForm({ initial, onSave, onCancel, mode }) {
 
 function blank() {
   return {
-    title: '', tag: 'Essay', author: '', role: '', readTime: '5 min read',
+    title: '', tag: 'Essay', author: '', role: '', read_time: '5 min read',
     excerpt: '', cover: '', body: '',
     date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
   }

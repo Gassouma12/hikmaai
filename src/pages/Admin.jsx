@@ -1,26 +1,30 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import PageTransition from '../components/PageTransition.jsx'
 import Masthead from '../components/Masthead.jsx'
 import AdminPodcasts from '../components/AdminPodcasts.jsx'
 import AdminArticles from '../components/AdminArticles.jsx'
 import AdminInbox from '../components/AdminInbox.jsx'
-import { useStorage } from '../lib/storage.js'
-
-const PASSWORD = 'MahaHikma123'
-const AUTH_KEY = 'hikma:admin-auth'
+import { supabase, adminSignIn, adminSignOut } from '../lib/supabase.js'
+import { useTable } from '../lib/api.js'
 
 export default function Admin() {
-  // Auth persists in sessionStorage so a refresh keeps you logged in but a
-  // fresh tab doesn't.
-  const [authed, setAuthed] = useState(() => sessionStorage.getItem(AUTH_KEY) === 'ok')
+  const [session, setSession] = useState(null)
   const [tab, setTab] = useState('podcasts')
 
-  // Subscribed here so the unread pill updates live when the inbox marks
-  // messages as read in the sibling tab.
-  const [outreach] = useStorage('outreach', [])
-  const unread = useMemo(() => outreach.filter((o) => !o.read).length, [outreach])
+  // Live session tracking: keeps `session` in sync if Supabase refreshes the
+  // token or the user signs out from another tab.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setSession(s))
+    return () => sub.subscription.unsubscribe()
+  }, [])
 
-  if (!authed) return <Gate onAuth={() => { sessionStorage.setItem(AUTH_KEY, 'ok'); setAuthed(true) }} />
+  // Unread inbox count for the tab pill — only meaningful once signed in,
+  // since RLS hides outreach from anon.
+  const [outreach] = useTable('outreach')
+  const unread = useMemo(() => session ? outreach.filter((o) => !o.read).length : 0, [outreach, session])
+
+  if (!session) return <Gate onAuthed={() => { /* state will sync via subscription */ }} />
 
   return (
     <PageTransition>
@@ -31,7 +35,7 @@ export default function Admin() {
           arabic="لوحة التحكم"
           kicker="Admin · HIKMA AI"
           title={<>Content <em>Studio</em></>}
-          lede="Publish new podcast episodes and articles. Changes are saved to this browser only — connect a backend to sync across devices."
+          lede="Publish new podcast episodes and articles. Changes sync to every visitor of the live site."
         />
 
         <div className="admin-tabs" role="tablist">
@@ -41,12 +45,7 @@ export default function Admin() {
             Inbox
             {unread > 0 && <span className="admin-tab-badge" aria-label={`${unread} unread`}>{unread}</span>}
           </Tab>
-          <button
-            className="admin-logout"
-            onClick={() => { sessionStorage.removeItem(AUTH_KEY); setAuthed(false) }}
-          >
-            Sign out
-          </button>
+          <button className="admin-logout" onClick={() => adminSignOut()}>Sign out</button>
         </div>
 
         {tab === 'podcasts' && <AdminPodcasts />}
@@ -71,14 +70,23 @@ function Tab({ id, tab, setTab, children }) {
   )
 }
 
-function Gate({ onAuth }) {
+function Gate({ onAuthed }) {
   const [pw, setPw] = useState('')
-  const [err, setErr] = useState(false)
+  const [err, setErr] = useState('')
+  const [busy, setBusy] = useState(false)
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
-    if (pw === PASSWORD) { setErr(false); onAuth() }
-    else { setErr(true); setPw('') }
+    setErr('')
+    setBusy(true)
+    const { ok, error } = await adminSignIn(pw)
+    setBusy(false)
+    if (!ok) {
+      setErr(humanizeError(error))
+      setPw('')
+    } else {
+      onAuthed?.()
+    }
   }
 
   return (
@@ -98,14 +106,25 @@ function Gate({ onAuth }) {
               autoFocus
               autoComplete="current-password"
               value={pw}
-              onChange={(e) => { setPw(e.target.value); setErr(false) }}
+              onChange={(e) => { setPw(e.target.value); setErr('') }}
               className={err ? 'is-error' : ''}
+              disabled={busy}
             />
-            {err && <p className="admin-gate-err">Incorrect password.</p>}
-            <button type="submit" className="admin-gate-btn">Sign in</button>
+            {err && <p className="admin-gate-err">{err}</p>}
+            <button type="submit" className="admin-gate-btn" disabled={busy || !pw}>
+              {busy ? 'Signing in…' : 'Sign in'}
+            </button>
           </form>
         </div>
       </div>
     </PageTransition>
   )
+}
+
+function humanizeError(error) {
+  if (!error) return 'Sign-in failed.'
+  const msg = String(error.message || '').toLowerCase()
+  if (msg.includes('invalid')) return 'Incorrect password.'
+  if (msg.includes('fetch')) return 'Cannot reach the server. Check your connection.'
+  return error.message || 'Sign-in failed.'
 }

@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
-import { useStorage } from '../lib/storage.js'
+import { useTable } from '../lib/api.js'
 
 /**
- * Inbox of inbound outreach from the public contact form. Stored in
- * localStorage under `hikma:outreach`. Each entry has a `read` flag — the
- * unread total is what the tab pill shows on the admin shell.
+ * Inbox of inbound outreach from the public contact form. Rows live in the
+ * Supabase `outreach` table. RLS lets anon INSERT (so the public form works
+ * without sign-in) but only authenticated users can SELECT/UPDATE/DELETE.
  */
 export default function AdminInbox() {
-  const [outreach, setOutreach] = useStorage('outreach', [])
-  const [filter, setFilter] = useState('all') // 'all' | 'unread'
+  const [outreach, { update, remove, loading }] = useTable('outreach')
+  const [filter, setFilter] = useState('all')
   const [openId, setOpenId] = useState(null)
 
   const visible = useMemo(
@@ -17,18 +17,24 @@ export default function AdminInbox() {
   )
   const unread = useMemo(() => outreach.filter((o) => !o.read).length, [outreach])
 
-  const markRead = (id, read = true) => {
-    setOutreach(outreach.map((o) => o.id === id ? { ...o, read } : o))
+  const markRead = async (id, read = true) => {
+    try { await update(id, { read }) } catch (e) { alert(e.message) }
   }
-  const remove = (id) => {
+  const onDelete = async (id) => {
     if (!window.confirm('Delete this message?')) return
-    setOutreach(outreach.filter((o) => o.id !== id))
+    try { await remove(id) } catch (e) { alert(e.message); return }
     if (openId === id) setOpenId(null)
   }
-  const markAllRead = () => setOutreach(outreach.map((o) => ({ ...o, read: true })))
-  const clearAll = () => {
+  const markAllRead = async () => {
+    for (const o of outreach.filter((o) => !o.read)) {
+      try { await update(o.id, { read: true }) } catch (e) { /* keep going */ }
+    }
+  }
+  const clearAll = async () => {
     if (!window.confirm('Delete ALL messages? This cannot be undone.')) return
-    setOutreach([])
+    for (const o of outreach) {
+      try { await remove(o.id) } catch (e) { /* keep going */ }
+    }
     setOpenId(null)
   }
 
@@ -43,7 +49,7 @@ export default function AdminInbox() {
         <div className="admin-section-head">
           <h2 className="admin-section-title">
             Outreach
-            <span className="admin-count">{outreach.length}</span>
+            <span className="admin-count">{loading ? '…' : outreach.length}</span>
             {unread > 0 && <span className="admin-count admin-count-unread">{unread} unread</span>}
           </h2>
           <div className="admin-actions">
@@ -66,7 +72,7 @@ export default function AdminInbox() {
           </div>
         </div>
 
-        {visible.length === 0 ? (
+        {visible.length === 0 && !loading ? (
           <p className="admin-empty">
             {filter === 'unread' ? 'No unread messages.' : 'No messages yet. Submissions from the contact form will appear here.'}
           </p>
@@ -79,14 +85,14 @@ export default function AdminInbox() {
                   <span className="inbox-name">{o.name || 'Anonymous'}</span>
                   <span className="inbox-purpose">{labelPurpose(o.purpose)}</span>
                   <span className="inbox-snippet">{(o.message || '').slice(0, 110)}{o.message && o.message.length > 110 ? '…' : ''}</span>
-                  <span className="inbox-date">{fmt(o.createdAt)}</span>
+                  <span className="inbox-date">{fmt(o.created_at)}</span>
                 </button>
 
                 {openId === o.id && (
                   <div className="inbox-detail">
                     <div className="inbox-detail-meta">
                       <a className="inbox-detail-email" href={`mailto:${o.email}?subject=Re: HIKMA outreach`}>{o.email}</a>
-                      {o.attachments?.length > 0 && (
+                      {Array.isArray(o.attachments) && o.attachments.length > 0 && (
                         <span className="inbox-attachments">
                           📎 {o.attachments.length} attachment{o.attachments.length > 1 ? 's' : ''}: {o.attachments.map((a) => a.name).join(', ')}
                         </span>
@@ -100,7 +106,7 @@ export default function AdminInbox() {
                       <button className="admin-btn" onClick={() => markRead(o.id, !o.read)}>
                         Mark {o.read ? 'unread' : 'read'}
                       </button>
-                      <button className="admin-btn admin-btn-danger" onClick={() => remove(o.id)}>Delete</button>
+                      <button className="admin-btn admin-btn-danger" onClick={() => onDelete(o.id)}>Delete</button>
                     </div>
                   </div>
                 )}
