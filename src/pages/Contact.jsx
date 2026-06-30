@@ -10,6 +10,20 @@ import StarDivider from '../components/StarDivider.jsx'
 import { CONTACT } from '../data/content.js'
 import { supabase } from '../lib/supabase.js'
 
+async function uploadAttachment(file) {
+  // Path: outreach/<timestamp>-<rand>-<originalName>
+  const safe = file.name.replace(/[^\w.\- ]+/g, '_').slice(0, 80)
+  const path = `outreach/${Date.now()}-${Math.random().toString(36).slice(2, 7)}-${safe}`
+  const { error } = await supabase.storage.from('media').upload(path, file, {
+    cacheControl: '3600',
+    contentType: file.type || 'application/pdf',
+    upsert: false,
+  })
+  if (error) throw error
+  const { data } = supabase.storage.from('media').getPublicUrl(path)
+  return { name: file.name, size: file.size, url: data.publicUrl, path }
+}
+
 const fmtSize = (bytes) => {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
@@ -46,12 +60,20 @@ export default function Contact() {
     setSending(true)
     setSendErr('')
     const fd = new FormData(e.currentTarget)
+    let uploaded = []
+    try {
+      uploaded = await Promise.all(files.map(uploadAttachment))
+    } catch (err) {
+      setSending(false)
+      setSendErr(`Could not upload an attachment: ${err.message}`)
+      return
+    }
     const entry = {
       purpose,
       name: fd.get('name')?.toString().trim() || '',
       email: fd.get('email')?.toString().trim() || '',
       message: fd.get('message')?.toString().trim() || '',
-      attachments: files.map((f) => ({ name: f.name, size: f.size })),
+      attachments: uploaded,
       read: false,
     }
     const { error } = await supabase.from('outreach').insert(entry)

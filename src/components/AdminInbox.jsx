@@ -92,13 +92,31 @@ export default function AdminInbox() {
                   <div className="inbox-detail">
                     <div className="inbox-detail-meta">
                       <a className="inbox-detail-email" href={`mailto:${o.email}?subject=Re: HIKMA outreach`}>{o.email}</a>
-                      {Array.isArray(o.attachments) && o.attachments.length > 0 && (
-                        <span className="inbox-attachments">
-                          📎 {o.attachments.length} attachment{o.attachments.length > 1 ? 's' : ''}: {o.attachments.map((a) => a.name).join(', ')}
-                        </span>
-                      )}
                     </div>
                     <div className="inbox-message">{o.message}</div>
+                    {Array.isArray(o.attachments) && o.attachments.length > 0 && (
+                      <div className="inbox-files">
+                        <div className="inbox-files-label">
+                          📎 {o.attachments.length} attachment{o.attachments.length > 1 ? 's' : ''}
+                        </div>
+                        <ul className="inbox-files-list">
+                          {o.attachments.map((a, i) => (
+                            <li key={(a.url || a.name) + i} className="inbox-file">
+                              <span className="inbox-file-name">{a.name}</span>
+                              {a.size != null && <span className="inbox-file-size">{fmtSize(a.size)}</span>}
+                              {a.url ? (
+                                <>
+                                  <a className="admin-btn" href={a.url} target="_blank" rel="noreferrer">Open</a>
+                                  <a className="admin-btn admin-btn-primary" href={a.url} download={a.name}>Download</a>
+                                </>
+                              ) : (
+                                <span className="inbox-file-missing">file not stored</span>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     <div className="inbox-detail-actions">
                       <a className="admin-btn admin-btn-primary" href={`mailto:${o.email}?subject=Re: HIKMA outreach`}>
                         Reply via email
@@ -123,6 +141,13 @@ function labelPurpose(p) {
   if (p === 'podcast') return 'Podcast'
   if (p === 'partnership') return 'Partnership'
   return p || ''
+}
+
+function fmtSize(bytes) {
+  if (bytes == null) return ''
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 function fmt(iso) {

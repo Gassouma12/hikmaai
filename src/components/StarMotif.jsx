@@ -1,18 +1,21 @@
-/** Small 8-point star (khatim) ornament used in dividers, nodes and accents. */
-export default function StarMotif({ size = 22, className, stroke = 'currentColor', strokeWidth = 1 }) {
+import starImg from '../images/star.png'
+
+/**
+ * 8-point khatim star ornament. Used in dividers, timeline nodes, the quote
+ * accent, the footer badge, etc. Renders the bundled star.png. Keeps the same
+ * `size` / `className` props the old SVG version exposed so every existing
+ * caller works without a change. (`stroke`/`strokeWidth` are accepted but
+ * ignored — the PNG carries its own colour.)
+ */
+export default function StarMotif({ size = 22, className = '', stroke, strokeWidth }) {
   return (
-    <svg
-      className={className}
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-      fill="none"
-      stroke={stroke}
-      strokeWidth={strokeWidth}
+    <img
+      src={starImg}
+      className={`star-img ${className}`}
+      style={{ width: size, height: size }}
+      alt=""
       aria-hidden="true"
-    >
-      <path d="M12 12 H36 V36 H12 Z" />
-      <path d="M24 6 L42 24 L24 42 L6 24 Z" />
-    </svg>
+      draggable="false"
+    />
   )
 }

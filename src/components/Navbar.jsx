@@ -2,21 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { NAV } from '../data/content.js'
-
-/** Small dot-cluster brand mark. */
-function BrandMark() {
-  return (
-    <svg className="nav-mark" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-      <g fill="currentColor">
-        <circle cx="12" cy="6" r="2.1" />
-        <circle cx="6.2" cy="12" r="2.1" />
-        <circle cx="17.8" cy="12" r="2.1" />
-        <circle cx="12" cy="18" r="2.1" />
-        <circle cx="12" cy="12" r="2.4" opacity="0.55" />
-      </g>
-    </svg>
-  )
-}
+import logoImg from '../images/logo.png'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -37,9 +23,8 @@ export default function Navbar() {
   return (
     <div className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
       <nav className="nav-pill">
-        <Link to="/" className="nav-brand" onClick={() => setOpen(false)}>
-          <BrandMark />
-          <span className="nav-wordmark">HIKMA <span>AI</span></span>
+        <Link to="/" className="nav-brand" onClick={() => setOpen(false)} aria-label="HIKMA AI">
+          <img className="nav-logo" src={logoImg} alt="HIKMA AI" draggable="false" />
         </Link>
 
         <ul className="nav-links">

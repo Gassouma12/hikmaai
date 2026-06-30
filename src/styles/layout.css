@@ -56,6 +56,14 @@
 }
 
 .nav-brand { display: flex; align-items: center; gap: 11px; padding-right: 6px; }
+.nav-logo {
+  height: 38px;
+  width: auto;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.nav--scrolled .nav-logo { height: 32px; }
 .nav-mark { color: var(--gold-bright); flex-shrink: 0; }
 .nav-wordmark {
   font-family: var(--font-sans);
@@ -858,7 +866,9 @@
   background: linear-gradient(135deg, var(--gold-bright), var(--gold));
   box-shadow: 0 10px 28px rgba(184, 135, 42, 0.4);
 }
-.ftr-star { width: 56%; height: 56%; color: var(--black); }
+.ftr-star { width: 70%; height: 70%; object-fit: contain; }
+/* Generic image-based star ornament (replaces the old SVG). */
+.star-img { object-fit: contain; display: inline-block; vertical-align: middle; }
 .ftr-line {
   position: absolute;
   left: 50%;
