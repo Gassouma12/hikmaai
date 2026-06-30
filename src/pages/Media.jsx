@@ -83,7 +83,7 @@ export default function Media() {
               onClick={() => switchTab('episodes')}
             >
               Podcast
-              <span className="voices-tab-count">{EPISODES.length}</span>
+              <span className="voices-tab-count">{allEpisodes.length}</span>
             </button>
             <button
               role="tab"
@@ -92,7 +92,7 @@ export default function Media() {
               onClick={() => switchTab('articles')}
             >
               Articles
-              <span className="voices-tab-count">{ARTICLES.length}</span>
+              <span className="voices-tab-count">{allArticles.length}</span>
             </button>
           </div>
         </div>

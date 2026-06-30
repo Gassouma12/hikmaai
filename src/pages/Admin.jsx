@@ -4,6 +4,7 @@ import Masthead from '../components/Masthead.jsx'
 import AdminPodcasts from '../components/AdminPodcasts.jsx'
 import AdminArticles from '../components/AdminArticles.jsx'
 import AdminInbox from '../components/AdminInbox.jsx'
+import ErrorBoundary from '../components/ErrorBoundary.jsx'
 import { supabase, adminSignIn, adminSignOut } from '../lib/supabase.js'
 import { useTable } from '../lib/api.js'
 
@@ -48,9 +49,11 @@ export default function Admin() {
           <button className="admin-logout" onClick={() => adminSignOut()}>Sign out</button>
         </div>
 
-        {tab === 'podcasts' && <AdminPodcasts />}
-        {tab === 'articles' && <AdminArticles />}
-        {tab === 'inbox' && <AdminInbox />}
+        <ErrorBoundary key={tab}>
+          {tab === 'podcasts' && <AdminPodcasts />}
+          {tab === 'articles' && <AdminArticles />}
+          {tab === 'inbox' && <AdminInbox />}
+        </ErrorBoundary>
       </div>
     </PageTransition>
   )

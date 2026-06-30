@@ -30,8 +30,12 @@ export function useTable(table, { order = 'created_at', ascending = false } = {}
 
   useEffect(() => {
     refetch()
+    // Unique per hook instance: two components subscribing to the same table
+    // (e.g. Admin shell + AdminInbox) must have their own channels, otherwise
+    // Supabase throws "cannot add postgres_changes callbacks after subscribe()".
+    const channelName = `pub:${table}:${Math.random().toString(36).slice(2, 10)}`
     const channel = supabase
-      .channel(`pub:${table}`)
+      .channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
         refetch()
       })

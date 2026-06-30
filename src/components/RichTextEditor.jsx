@@ -2,13 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import { uploadImage } from '../lib/supabase.js'
 
 /**
- * Minimal contenteditable rich-text editor used by the admin article composer.
- * Uses document.execCommand — deprecated but still the simplest cross-browser
- * way to get formatting without a 100KB editor framework. Saves as HTML.
+ * Minimal contenteditable rich-text editor.
  *
- * Toolbar supports: bold, italic, underline, headings, lists, quote, colors,
- * fonts, font sizes, links, and image insertion (uploaded files become data
- * URLs — no backend needed for the demo).
+ * Key tricks:
+ * 1. `styleWithCSS` is enabled so formatting commands emit `<span style="...">`
+ *    instead of deprecated `<font>` tags — modern CSS-styled spans actually win
+ *    against the parent .rte-area font/color rules.
+ * 2. The editor selection is saved every time it changes, and restored before
+ *    every toolbar action — otherwise opening a <select> would steal focus and
+ *    drop the selection, so font/color/size would have nothing to apply to.
  */
 
 const FONTS = [
@@ -19,33 +21,86 @@ const FONTS = [
   { label: 'Helvetica',            value: 'Helvetica, Arial, sans-serif' },
 ]
 const SIZES = [
-  { label: 'Small',  value: '2' },
-  { label: 'Normal', value: '3' },
-  { label: 'Large',  value: '5' },
-  { label: 'Huge',   value: '7' },
+  { label: 'Small',  value: '0.85em' },
+  { label: 'Normal', value: '1em' },
+  { label: 'Large',  value: '1.4em' },
+  { label: 'Huge',   value: '1.9em' },
 ]
 const COLORS = ['#1a1a1a', '#45433d', '#9a7a22', '#d4af37', '#b5642f', '#00696b', '#7a3b8f', '#bf3434']
 
 export default function RichTextEditor({ value, onChange, placeholder = 'Write your article…' }) {
   const ref = useRef(null)
   const fileRef = useRef(null)
+  const savedRange = useRef(null)
   const [uploading, setUploading] = useState(false)
 
-  // Initial mount: load saved HTML once. Don't re-sync from `value` afterward —
-  // doing so would move the caret on every keystroke.
+  // Initial mount: load saved HTML once; flip to CSS-mode execCommand output.
   useEffect(() => {
     if (ref.current && value !== undefined && ref.current.innerHTML !== value) {
       ref.current.innerHTML = value || ''
     }
+    try { document.execCommand('styleWithCSS', false, true) } catch { /* ignore */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const exec = (cmd, val) => {
-    document.execCommand(cmd, false, val)
+  // Capture the current selection range whenever it's inside the editor.
+  const captureSelection = () => {
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return
+    const r = sel.getRangeAt(0)
+    if (ref.current?.contains(r.commonAncestorContainer)) {
+      savedRange.current = r.cloneRange()
+    }
+  }
+  // Restore the last in-editor selection, then put focus back so execCommand
+  // has something to operate on.
+  const restoreSelection = () => {
     ref.current?.focus()
+    if (!savedRange.current) return
+    const sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(savedRange.current)
+  }
+
+  const exec = (cmd, val) => {
+    restoreSelection()
+    try { document.execCommand('styleWithCSS', false, true) } catch { /* ignore */ }
+    document.execCommand(cmd, false, val)
+    // After the command, capture the new selection so the next action keeps it.
+    captureSelection()
     onChange?.(ref.current?.innerHTML || '')
   }
-  const handleInput = () => onChange?.(ref.current?.innerHTML || '')
+
+  // Apply a CSS property to the current selection. Used for font-family / size
+  // so we can use modern CSS instead of execCommand's flaky fontName/fontSize.
+  const applyStyle = (prop, value) => {
+    restoreSelection()
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return
+    const range = sel.getRangeAt(0)
+    const span = document.createElement('span')
+    span.style[prop] = value
+    try {
+      // surroundContents fails when the selection spans across boundaries.
+      // In that case, fall back to extract + wrap + reinsert.
+      range.surroundContents(span)
+    } catch {
+      const frag = range.extractContents()
+      span.appendChild(frag)
+      range.insertNode(span)
+      // Re-select the wrapped content.
+      const newRange = document.createRange()
+      newRange.selectNodeContents(span)
+      sel.removeAllRanges()
+      sel.addRange(newRange)
+    }
+    captureSelection()
+    onChange?.(ref.current?.innerHTML || '')
+  }
+
+  const handleInput = () => { captureSelection(); onChange?.(ref.current?.innerHTML || '') }
+  const handleKeyUp = () => captureSelection()
+  const handleMouseUp = () => captureSelection()
 
   const insertLink = () => {
     const url = window.prompt('Link URL', 'https://')
@@ -79,7 +134,7 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Write y
         </Group>
 
         <Group>
-          <ToolSelect title="Block" onChange={(v) => exec('formatBlock', v)}>
+          <ToolSelect title="Block" onCapture={captureSelection} onChange={(v) => exec('formatBlock', v)}>
             <option value="p">Paragraph</option>
             <option value="h2">Heading 2</option>
             <option value="h3">Heading 3</option>
@@ -87,10 +142,10 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Write y
             <option value="blockquote">Quote</option>
             <option value="pre">Code</option>
           </ToolSelect>
-          <ToolSelect title="Font family" onChange={(v) => exec('fontName', v)}>
+          <ToolSelect title="Font" onCapture={captureSelection} onChange={(v) => applyStyle('fontFamily', v)}>
             {FONTS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
           </ToolSelect>
-          <ToolSelect title="Size" onChange={(v) => exec('fontSize', v)}>
+          <ToolSelect title="Size" onCapture={captureSelection} onChange={(v) => applyStyle('fontSize', v)}>
             {SIZES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
           </ToolSelect>
         </Group>
@@ -113,7 +168,8 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Write y
               type="button"
               className="rte-color"
               style={{ background: c }}
-              onClick={() => exec('foreColor', c)}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => applyStyle('color', c)}
               aria-label={`Color ${c}`}
             />
           ))}
@@ -136,6 +192,8 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Write y
         contentEditable
         suppressContentEditableWarning
         onInput={handleInput}
+        onKeyUp={handleKeyUp}
+        onMouseUp={handleMouseUp}
         onBlur={handleInput}
         data-placeholder={placeholder}
       />
@@ -146,6 +204,7 @@ export default function RichTextEditor({ value, onChange, placeholder = 'Write y
 function Group({ children, className = '', ...rest }) {
   return <div className={`rte-group ${className}`} {...rest}>{children}</div>
 }
+
 function ToolBtn({ onClick, title, children, disabled }) {
   return (
     <button
@@ -160,13 +219,21 @@ function ToolBtn({ onClick, title, children, disabled }) {
     </button>
   )
 }
-function ToolSelect({ title, onChange, children }) {
+
+function ToolSelect({ title, onChange, onCapture, children }) {
   return (
     <select
       className="rte-select"
       title={title}
-      onMouseDown={(e) => e.stopPropagation()}
-      onChange={(e) => { const v = e.target.value; if (v) onChange(v); e.target.selectedIndex = 0 }}
+      // Capture the editor's selection BEFORE the native dropdown opens and
+      // steals focus.
+      onMouseDown={() => onCapture?.()}
+      onFocus={() => onCapture?.()}
+      onChange={(e) => {
+        const v = e.target.value
+        if (v) onChange(v)
+        e.target.selectedIndex = 0
+      }}
       defaultValue=""
     >
       <option value="" disabled>{title}</option>
