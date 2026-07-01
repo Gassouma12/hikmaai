@@ -79,7 +79,7 @@ export default function Footer() {
       {/* Centre badge sitting on the gradient line */}
       <div className="ftr-badge">
         <span className="ftr-badge-inner">
-          <StarMotif className="ftr-star" stroke="var(--black)" strokeWidth={1.6} />
+          <StarMotif size={70} className="ftr-star" />
         </span>
       </div>
 
